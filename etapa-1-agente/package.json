@@ -1,0 +1,19 @@
+{
+  "name": "muva-agente-captacion",
+  "version": "1.0.0",
+  "description": "Agente de captación MÜVA PETS — WhatsApp + Instagram DM",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.55.0",
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.19.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

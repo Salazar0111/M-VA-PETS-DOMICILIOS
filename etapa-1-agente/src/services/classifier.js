@@ -13,7 +13,8 @@ async function clasificarMensaje(texto) {
   });
 
   const raw = response.content[0].text.trim();
-  return JSON.parse(raw);
+  const sinBloqueMarkdown = raw.replace(/^```(?:json)?\s*/, '').replace(/```\s*$/, '').trim();
+  return JSON.parse(sinBloqueMarkdown);
 }
 
 module.exports = { clasificarMensaje };

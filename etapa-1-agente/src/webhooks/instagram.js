@@ -2,7 +2,8 @@ const express = require('express');
 const { clasificarMensaje } = require('../services/classifier');
 const { enviarInstagram } = require('../services/messenger');
 const { avanzarConversacion, iniciarAgendamiento, responderFAQ, PASOS, obtenerSesion } = require('../services/conversation');
-const { crearCita } = require('../services/supabase');
+const { crearCita, actualizarEventoVeterinario } = require('../services/supabase');
+const { crearEventoVeterinario } = require('../services/calendar');
 
 const router = express.Router();
 
@@ -46,8 +47,12 @@ router.post('/', async (req, res) => {
         try {
           const cita = await crearCita({ canal: 'instagram', contactoId: senderId, ...datos });
           console.log(`[IG] Cita guardada en Supabase: ${cita.id}`);
-        } catch (dbErr) {
-          console.error('[IG] Error guardando cita en Supabase:', dbErr.message);
+
+          const eventoId = await crearEventoVeterinario(datos);
+          await actualizarEventoVeterinario(cita.id, eventoId);
+          console.log(`[IG] Evento creado en Google Calendar del veterinario: ${eventoId}`);
+        } catch (err) {
+          console.error('[IG] Error guardando cita:', err.message);
         }
       }
       return;

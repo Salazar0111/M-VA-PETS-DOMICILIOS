@@ -22,11 +22,10 @@ async function crearCita(datos) {
   return data;
 }
 
-async function actualizarEventosGoogle(citaId, eventoMuvaId, eventoVeterinarioId) {
+async function actualizarEventoVeterinario(citaId, eventoVeterinarioId) {
   const { error } = await supabase
     .from('citas')
     .update({
-      google_event_id_muva: eventoMuvaId,
       google_event_id_veterinario: eventoVeterinarioId,
       estado: 'confirmada',
     })
@@ -35,4 +34,4 @@ async function actualizarEventosGoogle(citaId, eventoMuvaId, eventoVeterinarioId
   if (error) throw error;
 }
 
-module.exports = { crearCita, actualizarEventosGoogle };
+module.exports = { crearCita, actualizarEventoVeterinario };

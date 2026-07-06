@@ -1,10 +1,12 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const whatsappRouter = require('./webhooks/whatsapp');
 const instagramRouter = require('./webhooks/instagram');
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/health', (_, res) => res.json({ status: 'ok', servicio: 'MÜVA PETS — Agente Captación' }));
 

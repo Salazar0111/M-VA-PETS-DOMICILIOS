@@ -4,6 +4,7 @@ const express = require('express');
 const cron = require('node-cron');
 const whatsappRouter = require('./webhooks/whatsapp');
 const instagramRouter = require('./webhooks/instagram');
+const veterinarioRouter = require('./routes/veterinario');
 const { calcularRutaDelDia, fechaISODeMañana } = require('./jobs/calcularRutaDelDia');
 
 const app = express();
@@ -24,6 +25,7 @@ app.get('/rutas/calcular/:fecha', async (req, res) => {
 
 app.use('/webhook/whatsapp', whatsappRouter);
 app.use('/webhook/instagram', instagramRouter);
+app.use('/api/veterinario', veterinarioRouter);
 
 // Job nocturno: cada día a las 8:00 p.m. (hora Bogotá) calcula la ruta óptima de mañana
 cron.schedule(

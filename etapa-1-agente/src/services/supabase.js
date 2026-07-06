@@ -75,9 +75,58 @@ async function guardarRutaDiaria(fechaISO, citasConMetricas, totalKm, totalMin) 
   if (error) throw error;
 }
 
+async function obtenerRutaOrdenada(fechaISO) {
+  const citas = await obtenerCitasDelDia(fechaISO);
+  return citas.sort((a, b) => (a.orden_ruta ?? 999) - (b.orden_ruta ?? 999));
+}
+
+async function registrarCheckIn(citaId) {
+  const { data, error } = await supabase
+    .from('citas')
+    .update({ check_in_at: new Date().toISOString() })
+    .eq('id', citaId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+async function registrarCheckOut(citaId) {
+  const { data: cita, error: errLectura } = await supabase
+    .from('citas')
+    .select('check_in_at')
+    .eq('id', citaId)
+    .single();
+
+  if (errLectura) throw errLectura;
+  if (!cita.check_in_at) throw new Error('No se puede hacer check-out sin check-in previo');
+
+  const checkOutAt = new Date();
+  const checkInAt = new Date(cita.check_in_at);
+  const duracionRealMin = (checkOutAt - checkInAt) / 60000;
+
+  const { data, error } = await supabase
+    .from('citas')
+    .update({
+      check_out_at: checkOutAt.toISOString(),
+      duracion_real_min: duracionRealMin,
+      estado: 'completada',
+    })
+    .eq('id', citaId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 module.exports = {
   crearCita,
   actualizarEventoVeterinario,
   obtenerCitasDelDia,
   guardarRutaDiaria,
+  obtenerRutaOrdenada,
+  registrarCheckIn,
+  registrarCheckOut,
 };

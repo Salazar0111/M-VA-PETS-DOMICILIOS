@@ -38,7 +38,7 @@ async function crearEventoVeterinario(datosCita) {
     requestBody: evento,
   });
 
-  return data.id;
+  return { eventoId: data.id, fechaHoraConfirmada: inicio };
 }
 
 module.exports = { crearEventoVeterinario };

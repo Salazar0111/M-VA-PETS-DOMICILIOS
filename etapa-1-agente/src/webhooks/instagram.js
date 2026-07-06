@@ -48,8 +48,8 @@ router.post('/', async (req, res) => {
           const cita = await crearCita({ canal: 'instagram', contactoId: senderId, ...datos });
           console.log(`[IG] Cita guardada en Supabase: ${cita.id}`);
 
-          const eventoId = await crearEventoVeterinario(datos);
-          await actualizarEventoVeterinario(cita.id, eventoId);
+          const { eventoId, fechaHoraConfirmada } = await crearEventoVeterinario(datos);
+          await actualizarEventoVeterinario(cita.id, eventoId, fechaHoraConfirmada);
           console.log(`[IG] Evento creado en Google Calendar del veterinario: ${eventoId}`);
         } catch (err) {
           console.error('[IG] Error guardando cita:', err.message);

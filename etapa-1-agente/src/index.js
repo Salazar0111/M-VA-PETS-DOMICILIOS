@@ -1,8 +1,10 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
+const cron = require('node-cron');
 const whatsappRouter = require('./webhooks/whatsapp');
 const instagramRouter = require('./webhooks/instagram');
+const { calcularRutaDelDia, fechaISODeMañana } = require('./jobs/calcularRutaDelDia');
 
 const app = express();
 app.use(express.json());
@@ -10,8 +12,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/health', (_, res) => res.json({ status: 'ok', servicio: 'MÜVA PETS — Agente Captación' }));
 
+// Endpoint manual para probar/forzar el cálculo de ruta de una fecha (YYYY-MM-DD)
+app.get('/rutas/calcular/:fecha', async (req, res) => {
+  try {
+    const resultado = await calcularRutaDelDia(req.params.fecha);
+    res.json(resultado || { mensaje: 'Sin citas confirmadas para esa fecha' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.use('/webhook/whatsapp', whatsappRouter);
 app.use('/webhook/instagram', instagramRouter);
+
+// Job nocturno: cada día a las 8:00 p.m. (hora Bogotá) calcula la ruta óptima de mañana
+cron.schedule(
+  '0 20 * * *',
+  async () => {
+    try {
+      await calcularRutaDelDia(fechaISODeMañana());
+    } catch (err) {
+      console.error('[Rutas] Error en cálculo nocturno:', err.message);
+    }
+  },
+  { timezone: 'America/Bogota' }
+);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

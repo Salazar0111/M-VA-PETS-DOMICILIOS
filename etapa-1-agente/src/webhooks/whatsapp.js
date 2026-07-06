@@ -2,6 +2,7 @@ const express = require('express');
 const { clasificarMensaje } = require('../services/classifier');
 const { enviarWhatsApp } = require('../services/messenger');
 const { avanzarConversacion, iniciarAgendamiento, responderFAQ, PASOS, obtenerSesion } = require('../services/conversation');
+const { crearCita } = require('../services/supabase');
 
 const router = express.Router();
 
@@ -39,11 +40,15 @@ router.post('/', async (req, res) => {
 
     // Si hay una sesión de agendamiento activa, continuar el flujo
     if (sesion.paso !== PASOS.INICIO) {
-      const { respuesta, completado } = avanzarConversacion(from, texto);
+      const { respuesta, datos, completado } = avanzarConversacion(from, texto);
       await enviarWhatsApp(from, respuesta);
       if (completado) {
-        console.log(`[WA] Agendamiento completado para ${from}`);
-        // TODO Etapa 2: guardar en Supabase + crear evento en Google Calendar
+        try {
+          const cita = await crearCita({ canal: 'whatsapp', contactoId: from, ...datos });
+          console.log(`[WA] Cita guardada en Supabase: ${cita.id}`);
+        } catch (dbErr) {
+          console.error('[WA] Error guardando cita en Supabase:', dbErr.message);
+        }
       }
       return;
     }

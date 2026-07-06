@@ -2,6 +2,7 @@ const express = require('express');
 const { clasificarMensaje } = require('../services/classifier');
 const { enviarInstagram } = require('../services/messenger');
 const { avanzarConversacion, iniciarAgendamiento, responderFAQ, PASOS, obtenerSesion } = require('../services/conversation');
+const { crearCita } = require('../services/supabase');
 
 const router = express.Router();
 
@@ -39,11 +40,15 @@ router.post('/', async (req, res) => {
     const idSesion = `ig_${senderId}`;
 
     if (sesion.paso !== PASOS.INICIO) {
-      const { respuesta, completado } = avanzarConversacion(idSesion, texto);
+      const { respuesta, datos, completado } = avanzarConversacion(idSesion, texto);
       await enviarInstagram(senderId, respuesta);
       if (completado) {
-        console.log(`[IG] Agendamiento completado para ${senderId}`);
-        // TODO Etapa 2: guardar en Supabase + crear evento en Google Calendar
+        try {
+          const cita = await crearCita({ canal: 'instagram', contactoId: senderId, ...datos });
+          console.log(`[IG] Cita guardada en Supabase: ${cita.id}`);
+        } catch (dbErr) {
+          console.error('[IG] Error guardando cita en Supabase:', dbErr.message);
+        }
       }
       return;
     }

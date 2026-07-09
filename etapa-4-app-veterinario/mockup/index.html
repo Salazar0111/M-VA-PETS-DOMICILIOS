@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MÜVA · App del veterinario — Maqueta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#303926;
+    --sage:#76836a;
+    --terra:#be7c60;
+    --camel:#bb9a7f;
+    --cream:#e3dacf;
+    --cream-2:#efe8dd;
+    --paper:#fbf8f3;
+    --ink:#2c3122;
+    --muted:#8a8577;
+    --line:rgba(48,57,38,.10);
+    --font-display:'Fraunces',serif;
+    --font-ui:'Jost',sans-serif;
+    --shadow:0 24px 60px -22px rgba(48,57,38,.35);
+    --shadow-card:0 2px 10px -4px rgba(48,57,38,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-ui);
+    color:var(--ink);
+    background:
+      radial-gradient(120% 90% at 12% -10%, #eef0e6 0%, transparent 55%),
+      radial-gradient(120% 90% at 100% 0%, #f0e3d8 0%, transparent 50%),
+      linear-gradient(160deg,#f4efe7 0%,#ece4d6 100%);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    padding:56px 28px 80px;
+  }
+
+  /* ---------- Page header ---------- */
+  .masthead{max-width:1200px;margin:0 auto 46px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:24px}
+  .brandline{display:flex;flex-direction:column;gap:10px}
+  .kicker{font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--sage);font-weight:500}
+  .wordmark{font-family:var(--font-display);font-weight:500;font-size:52px;letter-spacing:-.02em;color:var(--forest);line-height:.9}
+  .masthead h1{font-family:var(--font-ui);font-weight:300;font-size:15px;letter-spacing:.02em;color:var(--muted);max-width:340px;line-height:1.5}
+  .legend{display:flex;gap:18px;flex-wrap:wrap}
+  .swatch{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .dot{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+
+  /* ---------- Phone gallery ---------- */
+  .gallery{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:30px}
+  @media(max-width:1080px){.gallery{grid-template-columns:repeat(2,1fr);gap:44px 30px}}
+  @media(max-width:560px){.gallery{grid-template-columns:1fr}}
+
+  .device-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+  .device-wrap:nth-child(1){animation-delay:.05s}
+  .device-wrap:nth-child(2){animation-delay:.15s}
+  .device-wrap:nth-child(3){animation-delay:.25s}
+  .device-wrap:nth-child(4){animation-delay:.35s}
+  @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+  .screen-label{display:flex;align-items:center;gap:9px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sage);font-weight:500}
+  .screen-label b{font-family:var(--font-display);font-style:italic;font-weight:400;font-size:14px;letter-spacing:0;color:var(--forest);text-transform:none}
+
+  .phone{
+    width:100%;max-width:280px;aspect-ratio:280/595;
+    background:#12140f;border-radius:40px;padding:9px;
+    box-shadow:var(--shadow);position:relative;
+  }
+  .phone::after{content:"";position:absolute;top:20px;left:50%;transform:translateX(-50%);width:86px;height:22px;background:#12140f;border-radius:14px;z-index:5}
+  .screen{
+    width:100%;height:100%;background:var(--paper);border-radius:32px;overflow:hidden;position:relative;
+    display:flex;flex-direction:column;
+  }
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:14px 22px 6px;font-size:11px;font-weight:500;color:var(--forest);letter-spacing:.02em}
+  .statusbar .sig{display:flex;gap:4px;align-items:center;opacity:.8}
+  .statusbar .sig span{width:3px;border-radius:1px;background:var(--forest);display:inline-block}
+  .statusbar .sig span:nth-child(1){height:5px}.statusbar .sig span:nth-child(2){height:7px}.statusbar .sig span:nth-child(3){height:9px}.statusbar .sig span:nth-child(4){height:11px}
+
+  .content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+  /* ---------- Shared UI atoms ---------- */
+  .brand-mini{font-family:var(--font-display);font-weight:500;font-size:19px;color:var(--forest);letter-spacing:-.01em}
+  .chip{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;padding:4px 9px;border-radius:100px}
+  .chip.next{background:var(--terra);color:#fff}
+  .chip.done{background:rgba(118,131,106,.18);color:var(--sage)}
+  .chip.pending{background:rgba(187,154,127,.2);color:#8a6f52}
+  .btn{font-family:var(--font-ui);font-weight:500;font-size:13px;letter-spacing:.03em;border:none;border-radius:100px;padding:15px;width:100%;cursor:pointer}
+  .btn-primary{background:var(--forest);color:#f3efe6}
+  .btn-terra{background:var(--terra);color:#fff}
+  .btn-ghost{background:transparent;color:var(--forest);box-shadow:inset 0 0 0 1.4px rgba(48,57,38,.28)}
+
+  /* ===== SCREEN 1 — LOGIN ===== */
+  .s-login{background:
+      radial-gradient(90% 55% at 50% 8%, #eaf0e2 0%, transparent 60%),
+      linear-gradient(180deg,var(--paper) 0%, #f2ebdf 100%);}
+  .login-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 30px;text-align:center;position:relative}
+  .blob{position:absolute;width:230px;height:230px;top:38px;color:var(--cream);opacity:.6;z-index:0}
+  .login-hero .brand{position:relative;z-index:1}
+  .login-hero .wm{font-family:var(--font-display);font-weight:500;font-size:56px;color:var(--forest);letter-spacing:-.02em;line-height:.85}
+  .login-hero .tag{margin-top:8px;font-size:10px;letter-spacing:.44em;text-transform:uppercase;color:var(--sage)}
+  .paw{width:52px;height:52px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;margin-bottom:22px;font-size:24px}
+  .login-form{padding:0 26px 30px;display:flex;flex-direction:column;gap:11px}
+  .field{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 15px;text-align:left}
+  .field label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .field .val{font-size:14px;color:var(--forest);margin-top:3px;font-weight:400}
+  .login-form .hint{text-align:center;font-size:11px;color:var(--muted);margin-top:4px}
+
+  /* ===== SCREEN 2 — RUTA ===== */
+  .topbar{padding:8px 22px 16px;display:flex;justify-content:space-between;align-items:center}
+  .greet{padding:2px 22px 14px}
+  .greet .day{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);font-weight:500}
+  .greet h2{font-family:var(--font-display);font-weight:400;font-size:25px;color:var(--forest);margin-top:5px;letter-spacing:-.01em}
+  .daystats{margin:0 22px 16px;background:var(--forest);border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;color:#eae4d6}
+  .daystats .st .n{font-family:var(--font-display);font-size:20px;font-weight:500;line-height:1}
+  .daystats .st .l{font-size:9px;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-top:5px}
+  .daystats .sep{width:1px;background:rgba(255,255,255,.14)}
+  .routelist{flex:1;overflow:hidden;padding:0 22px;display:flex;flex-direction:column;gap:11px}
+  .visit{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;display:flex;gap:12px;align-items:center}
+  .ord{width:30px;height:30px;flex:none;border-radius:50%;background:var(--cream-2);color:var(--forest);font-family:var(--font-display);font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .visit.active .ord{background:var(--terra);color:#fff}
+  .visit .info{flex:1;min-width:0}
+  .visit .pet{font-family:var(--font-display);font-size:16px;font-weight:500;color:var(--forest);line-height:1.05}
+  .visit .addr{font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .visit .time{font-size:11px;color:var(--sage);font-weight:500;margin-top:5px;letter-spacing:.04em}
+
+  /* ===== SCREEN 3 — DETALLE ===== */
+  .det-head{padding:8px 22px 0;display:flex;align-items:center;justify-content:space-between}
+  .back{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--forest);font-size:16px}
+  .pet-hero{padding:14px 24px 6px}
+  .pet-hero .ord-badge{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--terra);font-weight:600}
+  .pet-hero h2{font-family:var(--font-display);font-weight:500;font-size:34px;color:var(--forest);line-height:.95;margin-top:4px;letter-spacing:-.02em}
+  .pet-hero .sub{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:.02em}
+  .map{margin:12px 24px 0;height:96px;border-radius:16px;position:relative;overflow:hidden;background:
+      linear-gradient(135deg,#e7e9dd,#d9d2c4);border:1px solid var(--line)}
+  .map .pin{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50% 50% 50% 2px;background:var(--terra);rotate:45deg;box-shadow:0 6px 14px -4px rgba(190,124,96,.7)}
+  .map .route{position:absolute;inset:0;background:
+      repeating-linear-gradient(115deg,transparent 0 16px,rgba(118,131,106,.25) 16px 18px)}
+  .det-rows{padding:14px 24px 0;display:flex;flex-direction:column;gap:1px;background:var(--line);border-radius:14px;overflow:hidden;margin:14px 24px 0}
+  .drow{background:#fff;padding:11px 14px;display:flex;justify-content:space-between;align-items:center}
+  .drow .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .drow .v{font-size:12.5px;color:var(--forest);font-weight:500;text-align:right;max-width:60%}
+  .det-action{margin-top:auto;padding:16px 24px 22px}
+  .timer{display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);margin-bottom:12px}
+  .timer .pulse{width:8px;height:8px;border-radius:50%;background:var(--terra);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* ===== SCREEN 4 — CIERRE ===== */
+  .s-close{background:linear-gradient(180deg,var(--forest) 0%,#28301f 100%);color:#ece5d7}
+  .close-top{padding:26px 26px 6px;text-align:center}
+  .close-top .seal{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;border:1px solid rgba(255,255,255,.14)}
+  .close-top .k{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--camel)}
+  .close-top h2{font-family:var(--font-display);font-weight:400;font-size:27px;margin-top:8px;color:#f2ecdf;letter-spacing:-.01em}
+  .close-grid{padding:22px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .stat{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:15px 14px}
+  .stat .n{font-family:var(--font-display);font-weight:500;font-size:26px;color:#f4eee2;line-height:1}
+  .stat .n small{font-size:12px;opacity:.6;font-weight:400}
+  .stat .l{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--camel);margin-top:7px}
+  .notify{margin:16px 24px 0;padding:13px 15px;border-radius:14px;background:rgba(187,154,127,.16);display:flex;gap:10px;align-items:center}
+  .notify .ic{font-size:16px}
+  .notify p{font-size:10.5px;line-height:1.45;color:#e4dccb}
+  .notify b{color:#f3ecdd;font-weight:500}
+  .close-action{margin-top:auto;padding:16px 24px 22px}
+
+  .homebar{height:5px;width:110px;background:rgba(48,57,38,.28);border-radius:100px;margin:8px auto 10px}
+  .s-close .homebar{background:rgba(255,255,255,.3)}
+
+  .footnote{max-width:1200px;margin:52px auto 0;text-align:center;font-size:12px;color:var(--muted);letter-spacing:.03em;line-height:1.7}
+  .footnote b{color:var(--forest);font-weight:500}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="brandline">
+    <span class="kicker">App del veterinario · Maqueta v1</span>
+    <span class="wordmark">müva</span>
+    <h1>Interfaz de campo para el médico veterinario a domicilio. Fiel al manual de marca — claro, cálido y sereno.</h1>
+  </div>
+  <div class="legend">
+    <span class="swatch"><span class="dot" style="background:#303926"></span>Bosque</span>
+    <span class="swatch"><span class="dot" style="background:#76836a"></span>Salvia</span>
+    <span class="swatch"><span class="dot" style="background:#be7c60"></span>Terracota</span>
+    <span class="swatch"><span class="dot" style="background:#bb9a7f"></span>Camel</span>
+    <span class="swatch"><span class="dot" style="background:#e3dacf"></span>Crema</span>
+  </div>
+</header>
+
+<main class="gallery">
+
+  <!-- ===== 1 · LOGIN ===== -->
+  <div class="device-wrap">
+    <div class="screen-label"><span>01</span><b>Ingreso</b></div>
+    <div class="phone"><div class="screen s-login">
+      <div class="statusbar"><span>9:41</span><span class="sig"><span></span><span></span><span></span><span></span></span></div>
+      <div class="content">
+        <div class="login-hero">
+          <svg class="blob" viewBox="0 0 200 200"><path fill="currentColor" d="M42,-58C54,-49,62,-35,66,-20C70,-4,70,13,63,27C56,41,42,52,26,60C10,68,-8,73,-25,68C-42,63,-58,48,-66,30C-74,12,-74,-9,-66,-26C-58,-43,-42,-56,-25,-63C-8,-70,10,-71,26,-68C31,-66,36,-63,42,-58Z" transform="translate(100 100)"/></svg>
+          <div class="brand">
+            <div class="paw" style="margin:0 auto 20px">🐾</div>
+            <div class="wm">müva</div>
+            <div class="tag">Equipo veterinario</div>
+          </div>
+        </div>
+        <div class="login-form">
+          <div class="field"><label>Correo</label><div class="val">dra.rincon@muva.co</div></div>
+          <div class="field"><label>Contraseña</label><div class="val">••••••••••</div></div>
+          <button class="btn btn-terra">Ingresar a mi jornada</button>
+          <p class="hint">Bienvenida de vuelta 🌿</p>
+        </div>
+      </div>
+      <div class="homebar"></div>
+    </div></div>
+  </div>
+
+  <!-- ===== 2 · RUTA DEL DÍA ===== -->
+  <div class="device-wrap">
+    <div class="screen-label"><span>02</span><b>Ruta del día</b></div>
+    <div class="phone"><div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="sig"><span></span><span></span><span></span><span></span></span></div>
+      <div class="content">
+        <div class="topbar"><span class="brand-mini">müva</span><span class="chip pending">Lunes 14 jul</span></div>
+        <div class="greet"><div class="day">Tu jornada</div><h2>Buenos días,<br>Dra. Rincón</h2></div>
+        <div class="daystats">
+          <div class="st"><div class="n">5</div><div class="l">Visitas</div></div>
+          <div class="sep"></div>
+          <div class="st"><div class="n">18<small style="font-size:11px"> km</small></div><div class="l">Recorrido</div></div>
+          <div class="sep"></div>
+          <div class="st"><div class="n">8–4</div><div class="l">Jornada</div></div>
+        </div>
+        <div class="routelist">
+          <div class="visit active">
+            <div class="ord">1</div>
+            <div class="info"><div class="pet">Kleo</div><div class="addr">Cra 7F #148-45 · Cedritos</div><div class="time">9:00 a.m. · Gato</div></div>
+            <span class="chip next">Ahora</span>
+          </div>
+          <div class="visit">
+            <div class="ord">2</div>
+            <div class="info"><div class="pet">Nube</div><div class="addr">Cl 134 #7-83 · Contador</div><div class="time">10:15 a.m. · Perro</div></div>
+            <span class="chip pending">Programada</span>
+          </div>
+          <div class="visit">
+            <div class="ord">3</div>
+            <div class="info"><div class="pet">Tomás</div><div class="addr">Cra 19 #140-20 · Cedritos</div><div class="time">11:30 a.m. · Perro</div></div>
+            <span class="chip pending">Programada</span>
+          </div>
+          <div class="visit">
+            <div class="ord">4</div>
+            <div class="info"><div class="pet">Miel</div><div class="addr">Cl 116 #15-40 · Santa Bárbara</div><div class="time">1:00 p.m. · Gato</div></div>
+            <span class="chip pending">Programada</span>
+          </div>
+        </div>
+      </div>
+      <div class="homebar"></div>
+    </div></div>
+  </div>
+
+  <!-- ===== 3 · DETALLE + CHECK-IN ===== -->
+  <div class="device-wrap">
+    <div class="screen-label"><span>03</span><b>Visita en curso</b></div>
+    <div class="phone"><div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="sig"><span></span><span></span><span></span><span></span></span></div>
+      <div class="content">
+        <div class="det-head"><div class="back">←</div><span class="chip next">Visita 1 de 5</span></div>
+        <div class="pet-hero">
+          <div class="ord-badge">Parada 01 · Cedritos</div>
+          <h2>Kleo</h2>
+          <div class="sub">Gato · Doméstico pelo corto · 4 años</div>
+        </div>
+        <div class="map"><div class="route"></div><div class="pin"></div></div>
+        <div class="det-rows" style="margin-top:14px">
+          <div class="drow"><span class="k">Responsable</span><span class="v">Laura Mejía</span></div>
+          <div class="drow"><span class="k">Dirección</span><span class="v">Cra 7F #148-45</span></div>
+          <div class="drow"><span class="k">Motivo</span><span class="v">Control · vacunación</span></div>
+        </div>
+        <div class="det-action">
+          <div class="timer"><span class="pulse"></span>En consulta · 00:18:42</div>
+          <button class="btn btn-primary">Finalizar visita · Check-out</button>
+        </div>
+      </div>
+      <div class="homebar"></div>
+    </div></div>
+  </div>
+
+  <!-- ===== 4 · CIERRE DE JORNADA ===== -->
+  <div class="device-wrap">
+    <div class="screen-label"><span>04</span><b>Cierre de jornada</b></div>
+    <div class="phone"><div class="screen s-close">
+      <div class="statusbar" style="color:#ece5d7"><span>4:12</span><span class="sig"><span style="background:#ece5d7"></span><span style="background:#ece5d7"></span><span style="background:#ece5d7"></span><span style="background:#ece5d7"></span></span></div>
+      <div class="content">
+        <div class="close-top">
+          <div class="seal">✓</div>
+          <div class="k">Jornada completada</div>
+          <h2>5 de 5 visitas<br>atendidas</h2>
+        </div>
+        <div class="close-grid">
+          <div class="stat"><div class="n">18.4<small> km</small></div><div class="l">Recorrido</div></div>
+          <div class="stat"><div class="n">1<small>h</small> 47<small>m</small></div><div class="l">Desplazamiento</div></div>
+          <div class="stat"><div class="n">3<small>h</small> 12<small>m</small></div><div class="l">En consulta</div></div>
+          <div class="stat"><div class="n">38<small> min</small></div><div class="l">Promedio / visita</div></div>
+        </div>
+        <div class="notify">
+          <span class="ic">🌿</span>
+          <p><b>Disponibilidad enviada a MÜVA.</b> Tu agenda quedó libre desde las 4:00 p.m.</p>
+        </div>
+        <div class="close-action">
+          <button class="btn btn-terra">Ver resumen del día</button>
+        </div>
+      </div>
+      <div class="homebar"></div>
+    </div></div>
+  </div>
+
+</main>
+
+<p class="footnote">
+  <b>müva · App del veterinario</b> — maqueta de aprobación. Tipografías web: <b>Fraunces</b> (display, cercana al logotipo) + <b>Jost</b> (interfaz).<br>
+  Datos de ejemplo. Al aprobar el estilo, conectamos estas pantallas al backend real (ruta, check-in/out y cierre ya funcionan en la Etapa 4).
+</p>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mockup-vet",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "etapa-4-app-veterinario/mockup", "-l", "4173"],
+      "port": 4173
+    }
+  ]
+}

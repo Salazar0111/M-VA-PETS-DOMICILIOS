@@ -13,6 +13,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/health', (_, res) => res.json({ status: 'ok', servicio: 'MÜVA PETS — Agente Captación' }));
 
+// Maqueta de la app del veterinario (URL limpia para compartir con el cliente)
+app.get('/maqueta', (_, res) => res.sendFile(path.join(__dirname, 'public', 'maqueta.html')));
+
 // Endpoint manual para probar/forzar el cálculo de ruta de una fecha (YYYY-MM-DD)
 app.get('/rutas/calcular/:fecha', async (req, res) => {
   try {

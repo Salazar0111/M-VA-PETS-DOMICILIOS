@@ -16,6 +16,9 @@ app.get('/health', (_, res) => res.json({ status: 'ok', servicio: 'MÜVA PETS �
 // Maqueta de la app del veterinario (URL limpia para compartir con el cliente)
 app.get('/maqueta', (_, res) => res.sendFile(path.join(__dirname, 'public', 'maqueta.html')));
 
+// Maqueta del panel de operación de MÜVA
+app.get('/dashboard', (_, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+
 // Endpoint manual para probar/forzar el cálculo de ruta de una fecha (YYYY-MM-DD)
 app.get('/rutas/calcular/:fecha', async (req, res) => {
   try {

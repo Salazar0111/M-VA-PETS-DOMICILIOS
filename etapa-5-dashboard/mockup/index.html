@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MÜVA · Panel de operación — Maqueta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#303926; --sage:#76836a; --terra:#be7c60; --camel:#bb9a7f;
+    --cream:#e3dacf; --cream-2:#efe8dd; --paper:#fbf8f3; --ink:#2c3122; --muted:#8f8a7c;
+    --line:rgba(48,57,38,.10); --line-2:rgba(48,57,38,.06);
+    --ok:#6f8560; --busy:#be7c60; --wait:#bb9a7f;
+    --font-display:'Fraunces',serif; --font-ui:'Jost',sans-serif;
+    --shadow:0 1px 2px rgba(48,57,38,.04),0 8px 24px -14px rgba(48,57,38,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--font-ui);color:var(--ink);
+    background:linear-gradient(150deg,#f4efe7 0%,#ece4d6 100%);
+    -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
+  }
+  .app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+
+  /* ---- Sidebar ---- */
+  .side{background:var(--forest);color:#d9d3c4;padding:26px 20px;display:flex;flex-direction:column;gap:30px;position:sticky;top:0;height:100vh}
+  .side .wm{font-family:var(--font-display);font-weight:500;font-size:32px;color:#f2ecdf;letter-spacing:-.02em;line-height:1}
+  .side .wm small{display:block;font-family:var(--font-ui);font-size:9px;letter-spacing:.36em;color:var(--camel);margin-top:7px;font-weight:400}
+  .nav{display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:11px;color:#c6c0b1;font-size:13.5px;text-decoration:none;letter-spacing:.01em;transition:.15s}
+  .nav a .ic{width:16px;text-align:center;opacity:.85}
+  .nav a:hover{background:rgba(255,255,255,.05);color:#e9e3d5}
+  .nav a.on{background:rgba(255,255,255,.09);color:#f4eee1;font-weight:500}
+  .side .foot{margin-top:auto;display:flex;align-items:center;gap:11px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1)}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--camel);color:var(--forest);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:600;font-size:15px}
+  .side .foot .who{font-size:12.5px;color:#e6e0d1;line-height:1.3}
+  .side .foot .who small{display:block;color:#9a9384;font-size:10.5px;letter-spacing:.04em}
+
+  /* ---- Main ---- */
+  .main{padding:30px 40px 44px;display:flex;flex-direction:column;gap:22px;min-width:0}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+  .top .day{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);font-weight:500}
+  .top h1{font-family:var(--font-display);font-weight:400;font-size:30px;color:var(--forest);margin-top:6px;letter-spacing:-.01em}
+  .statuspill{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 16px;box-shadow:var(--shadow)}
+  .statuspill .live{display:flex;align-items:center;gap:8px}
+  .statuspill .d{width:9px;height:9px;border-radius:50%;background:var(--busy);box-shadow:0 0 0 4px rgba(190,124,96,.16)}
+  .statuspill .t1{font-size:13px;color:var(--forest);font-weight:500;line-height:1.2}
+  .statuspill .t2{font-size:10.5px;color:var(--muted);letter-spacing:.03em}
+  .statuspill .div{width:1px;height:26px;background:var(--line)}
+  .statuspill .free .t1{color:var(--sage)}
+
+  /* KPI row */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow)}
+  .kpi .l{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .kpi .l .sq{width:8px;height:8px;border-radius:2px}
+  .kpi .n{font-family:var(--font-display);font-weight:500;font-size:34px;color:var(--forest);margin-top:12px;line-height:.95}
+  .kpi .n small{font-size:15px;color:var(--muted);font-weight:400}
+  .kpi .sub{font-size:11px;color:var(--sage);margin-top:8px;letter-spacing:.02em}
+
+  /* Grid: table + side panels */
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;align-items:start}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  .card .head{padding:18px 20px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line-2)}
+  .card .head h2{font-family:var(--font-display);font-weight:500;font-size:17px;color:var(--forest);letter-spacing:-.01em}
+  .card .head .meta{font-size:11px;color:var(--muted);letter-spacing:.04em}
+
+  table{width:100%;border-collapse:collapse}
+  thead th{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:11px 20px;background:rgba(48,57,38,.025)}
+  tbody td{padding:13px 20px;border-top:1px solid var(--line-2);font-size:13px;color:var(--ink);vertical-align:middle}
+  tbody tr:hover{background:rgba(118,131,106,.05)}
+  .ord{width:24px;height:24px;border-radius:50%;background:var(--cream-2);color:var(--forest);font-family:var(--font-display);font-weight:600;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+  .pet{font-family:var(--font-display);font-weight:500;font-size:15px;color:var(--forest)}
+  .sub-c{font-size:11px;color:var(--muted);margin-top:1px}
+  .zone{color:var(--muted);font-size:12px}
+  .st{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;padding:4px 10px;border-radius:100px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+  .st .dot{width:6px;height:6px;border-radius:50%}
+  .st.done{background:rgba(111,133,96,.15);color:#566b47}
+  .st.done .dot{background:var(--ok)}
+  .st.live{background:rgba(190,124,96,.16);color:#9a5a3e}
+  .st.live .dot{background:var(--busy);animation:blink 1.4s infinite}
+  .st.prog{background:rgba(187,154,127,.2);color:#836a4f}
+  .st.prog .dot{background:var(--wait)}
+  @keyframes blink{50%{opacity:.35}}
+
+  /* right column */
+  .rcol{display:flex;flex-direction:column;gap:22px}
+  .avail{padding:18px 20px 20px}
+  .avail h2{font-family:var(--font-display);font-weight:500;font-size:17px;color:var(--forest);margin-bottom:4px}
+  .avail .who{font-size:12px;color:var(--muted);margin-bottom:16px}
+  .timeline{position:relative;height:44px;border-radius:10px;overflow:hidden;background:var(--cream-2);display:flex}
+  .timeline .seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:9.5px;letter-spacing:.04em}
+  .timeline .busy{background:var(--forest);color:#e7e1d3}
+  .timeline .free{background:repeating-linear-gradient(45deg,#e7e9dd 0 7px,#dfe2d4 7px 9px);color:var(--sage)}
+  .tl-axis{display:flex;justify-content:space-between;margin-top:7px;font-size:10px;color:var(--muted);letter-spacing:.05em}
+  .nextfree{margin-top:16px;background:rgba(118,131,106,.1);border:1px solid rgba(118,131,106,.22);border-radius:13px;padding:13px 15px;display:flex;align-items:center;gap:12px}
+  .nextfree .big{font-family:var(--font-display);font-weight:500;font-size:20px;color:var(--forest);line-height:1}
+  .nextfree .lab{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin-bottom:3px}
+  .notify{margin-top:12px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px;line-height:1.4}
+  .notify b{color:var(--forest);font-weight:500}
+
+  /* week chart */
+  .week{padding:18px 20px 20px}
+  .week h2{font-family:var(--font-display);font-weight:500;font-size:17px;color:var(--forest);margin-bottom:2px}
+  .week .cap{font-size:11px;color:var(--muted);margin-bottom:18px}
+  .bars{display:flex;align-items:flex-end;gap:14px;height:120px;padding-top:6px}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+  .bar .col{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--camel),#a98a6d);position:relative}
+  .bar.on .col{background:linear-gradient(180deg,var(--terra),#a96545)}
+  .bar .v{font-family:var(--font-display);font-weight:500;font-size:13px;color:var(--forest)}
+  .bar .d{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+  .note{text-align:center;font-size:11.5px;color:var(--muted);letter-spacing:.02em;margin-top:2px}
+  .note b{color:var(--forest);font-weight:500}
+
+  @media(max-width:1120px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="wm">müva<small>OPERACIÓN</small></div>
+    <nav class="nav">
+      <a class="on" href="#"><span class="ic">◧</span> Resumen</a>
+      <a href="#"><span class="ic">◔</span> Citas</a>
+      <a href="#"><span class="ic">✦</span> Veterinarios</a>
+      <a href="#"><span class="ic">↳</span> Rutas</a>
+      <a href="#"><span class="ic">♡</span> Clientes</a>
+      <a href="#"><span class="ic">⚙</span> Ajustes</a>
+    </nav>
+    <div class="foot">
+      <div class="avatar">M</div>
+      <div class="who">MÜVA<small>Administración</small></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="top">
+      <div>
+        <div class="day">Lunes 14 de julio · 2025</div>
+        <h1>Panel de operación</h1>
+      </div>
+      <div class="statuspill">
+        <div class="live"><span class="d"></span><div><div class="t1">Dra. Rincón</div><div class="t2">En consulta · Kleo</div></div></div>
+        <div class="div"></div>
+        <div class="free"><div class="t2">Próxima disponibilidad</div><div class="t1">4:00 p.m.</div></div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi"><div class="l"><span class="sq" style="background:var(--forest)"></span>Visitas de hoy</div><div class="n">5</div><div class="sub">Ventana 8:00 a.m. – 4:00 p.m.</div></div>
+      <div class="kpi"><div class="l"><span class="sq" style="background:var(--ok)"></span>Completadas</div><div class="n">3<small> / 5</small></div><div class="sub">2 restantes en ruta</div></div>
+      <div class="kpi"><div class="l"><span class="sq" style="background:var(--camel)"></span>Km recorridos</div><div class="n">18.4<small> km</small></div><div class="sub">1h 47m de desplazamiento</div></div>
+      <div class="kpi"><div class="l"><span class="sq" style="background:var(--terra)"></span>Promedio / visita</div><div class="n">38<small> min</small></div><div class="sub">Tiempo efectivo en consulta</div></div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid">
+
+      <!-- Citas table -->
+      <div class="card">
+        <div class="head"><h2>Citas de hoy</h2><span class="meta">Ruta optimizada · Cedritos → Santa Bárbara</span></div>
+        <table>
+          <thead><tr><th>#</th><th>Mascota</th><th>Responsable</th><th>Zona</th><th>Hora</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="ord">1</span></td>
+              <td><div class="pet">Kleo</div><div class="sub-c">Gato · Control</div></td>
+              <td>Laura Mejía</td><td class="zone">Cedritos</td><td>9:00 a.m.</td>
+              <td><span class="st live"><span class="dot"></span>En consulta</span></td>
+            </tr>
+            <tr>
+              <td><span class="ord">2</span></td>
+              <td><div class="pet">Nube</div><div class="sub-c">Perro · Vacunación</div></td>
+              <td>Andrés Gómez</td><td class="zone">Contador</td><td>10:15 a.m.</td>
+              <td><span class="st prog"><span class="dot"></span>Programada</span></td>
+            </tr>
+            <tr>
+              <td><span class="ord">3</span></td>
+              <td><div class="pet">Tomás</div><div class="sub-c">Perro · Control</div></td>
+              <td>Marcela Ruiz</td><td class="zone">Cedritos</td><td>11:30 a.m.</td>
+              <td><span class="st prog"><span class="dot"></span>Programada</span></td>
+            </tr>
+            <tr>
+              <td><span class="ord">✓</span></td>
+              <td><div class="pet">Coco</div><div class="sub-c">Perro · Desparasitación</div></td>
+              <td>Julián Peña</td><td class="zone">Cedritos</td><td>8:00 a.m.</td>
+              <td><span class="st done"><span class="dot"></span>Completada</span></td>
+            </tr>
+            <tr>
+              <td><span class="ord">✓</span></td>
+              <td><div class="pet">Miel</div><div class="sub-c">Gato · Control</div></td>
+              <td>Paula Torres</td><td class="zone">Sta. Bárbara</td><td>7:15 a.m.</td>
+              <td><span class="st done"><span class="dot"></span>Completada</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Right column -->
+      <div class="rcol">
+        <div class="card avail">
+          <h2>Disponibilidad del veterinario</h2>
+          <div class="who">Dra. Rincón · jornada 8:00 a.m. – 4:00 p.m.</div>
+          <div class="timeline">
+            <div class="seg busy" style="width:14%">8–9</div>
+            <div class="seg busy" style="width:34%">consultas</div>
+            <div class="seg free" style="width:22%">libre</div>
+            <div class="seg busy" style="width:18%">ruta</div>
+            <div class="seg free" style="width:12%">libre</div>
+          </div>
+          <div class="tl-axis"><span>8 a.m.</span><span>11</span><span>1 p.m.</span><span>4 p.m.</span></div>
+          <div class="nextfree">
+            <div>
+              <div class="lab">Bloque libre más próximo</div>
+              <div class="big">1:40 – 2:35 p.m.</div>
+            </div>
+          </div>
+          <div class="notify">🌿 <span><b>MÜVA fue notificado</b> automáticamente de los espacios disponibles en la agenda.</span></div>
+        </div>
+
+        <div class="card week">
+          <h2>Esta semana</h2>
+          <div class="cap">Visitas atendidas por día</div>
+          <div class="bars">
+            <div class="bar"><div class="v">4</div><div class="col" style="height:44%"></div><div class="d">Lun</div></div>
+            <div class="bar"><div class="v">6</div><div class="col" style="height:66%"></div><div class="d">Mar</div></div>
+            <div class="bar"><div class="v">5</div><div class="col" style="height:55%"></div><div class="d">Mié</div></div>
+            <div class="bar"><div class="v">7</div><div class="col" style="height:80%"></div><div class="d">Jue</div></div>
+            <div class="bar on"><div class="v">5</div><div class="col" style="height:55%"></div><div class="d">Hoy</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="note"><b>müva · Panel de operación</b> — maqueta de aprobación. Datos de ejemplo. Refleja el alcance del contrato: métricas de cierre, estado del veterinario y aviso automático de disponibilidad.</p>
+  </main>
+
+</div>
+</body>
+</html>

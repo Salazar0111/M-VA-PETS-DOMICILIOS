@@ -1,0 +1,20 @@
+{
+  "name": "MÜVA · Jornada veterinaria",
+  "short_name": "MÜVA",
+  "description": "Ruta diaria, check-in y cierre de jornada del veterinario a domicilio.",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf8f3",
+  "theme_color": "#fbf8f3",
+  "lang": "es-CO",
+  "icons": [
+    {
+      "src": "/app/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -75,9 +75,19 @@ async function guardarRutaDiaria(fechaISO, citasConMetricas, totalKm, totalMin) 
   if (error) throw error;
 }
 
+// La jornada del veterinario incluye las visitas ya completadas: si solo
+// trajéramos las confirmadas, cada check-out borraría la visita de su lista
+// y el cierre de jornada no podría sumar tiempos ni kilómetros.
 async function obtenerRutaOrdenada(fechaISO) {
-  const citas = await obtenerCitasDelDia(fechaISO);
-  return citas.sort((a, b) => (a.orden_ruta ?? 999) - (b.orden_ruta ?? 999));
+  const { data, error } = await supabase
+    .from('citas')
+    .select('*')
+    .in('estado', ['confirmada', 'completada'])
+    .gte('fecha_hora_confirmada', `${fechaISO}T00:00:00`)
+    .lte('fecha_hora_confirmada', `${fechaISO}T23:59:59`);
+
+  if (error) throw error;
+  return data.sort((a, b) => (a.orden_ruta ?? 999) - (b.orden_ruta ?? 999));
 }
 
 async function registrarCheckIn(citaId) {

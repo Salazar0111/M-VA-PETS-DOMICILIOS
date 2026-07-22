@@ -21,6 +21,10 @@ app.get('/maqueta', (_, res) => res.sendFile(path.join(__dirname, 'public', 'maq
 // Maqueta del panel de operación de MÜVA
 app.get('/dashboard', (_, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
 
+// App del veterinario (PWA). El scope /app/ debe resolver al shell.
+app.get('/app', (_, res) => res.redirect('/app/'));
+app.get('/app/', (_, res) => res.sendFile(path.join(__dirname, 'public', 'app', 'index.html')));
+
 // Recalcular la ruta de una fecha (YYYY-MM-DD). Solo admin: consume cuota de Google Maps.
 app.get('/rutas/calcular/:fecha', requiereSesion, requiereRol('admin'), async (req, res) => {
   try {

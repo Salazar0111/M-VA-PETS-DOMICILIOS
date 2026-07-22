@@ -114,7 +114,9 @@ async function registrarCheckOut(citaId) {
 
   const checkOutAt = new Date();
   const checkInAt = new Date(cita.check_in_at);
-  const duracionRealMin = (checkOutAt - checkInAt) / 60000;
+  // Nunca guardamos una duración negativa: un desfase de reloj o un dato
+  // mal cargado envenenaría los promedios del panel sin dar señal.
+  const duracionRealMin = Math.max(0, (checkOutAt - checkInAt) / 60000);
 
   const { data, error } = await supabase
     .from('citas')

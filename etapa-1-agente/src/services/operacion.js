@@ -155,11 +155,14 @@ async function visitasDeLaSemana(fechaISO) {
 
   if (error) throw error;
 
+  // "Hoy" es el día real, no la fecha que se esté consultando: si el panel
+  // mira otra semana, marcar esa fecha como hoy sería mentir.
+  const hoyBogota = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
   const nombres = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
   return dias.map((fecha, i) => ({
     fecha,
-    dia: fecha === fechaISO ? 'Hoy' : nombres[i],
-    esHoy: fecha === fechaISO,
+    dia: fecha === hoyBogota ? 'Hoy' : nombres[i],
+    esHoy: fecha === hoyBogota,
     visitas: (data || []).filter((c) => (c.fecha_hora_confirmada || '').slice(0, 10) === fecha).length,
     completadas: (data || []).filter(
       (c) => (c.fecha_hora_confirmada || '').slice(0, 10) === fecha && c.check_out_at

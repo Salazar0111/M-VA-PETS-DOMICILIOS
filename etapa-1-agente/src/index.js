@@ -6,6 +6,7 @@ const whatsappRouter = require('./webhooks/whatsapp');
 const instagramRouter = require('./webhooks/instagram');
 const veterinarioRouter = require('./routes/veterinario');
 const authRouter = require('./routes/auth');
+const muvaRouter = require('./routes/muva');
 const { requiereSesion, requiereRol } = require('./middleware/auth');
 const { calcularRutaDelDia, fechaISODeMañana } = require('./jobs/calcularRutaDelDia');
 
@@ -41,6 +42,7 @@ app.use('/webhook/instagram', instagramRouter);
 
 app.use('/api/auth', authRouter);
 app.use('/api/veterinario', requiereSesion, requiereRol('veterinario', 'admin'), veterinarioRouter);
+app.use('/api/muva', requiereSesion, requiereRol('admin'), muvaRouter);
 
 // Job nocturno: cada día a las 8:00 p.m. (hora Bogotá) calcula la ruta óptima de mañana
 cron.schedule(

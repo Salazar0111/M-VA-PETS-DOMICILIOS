@@ -102,7 +102,10 @@ async function registrarCheckIn(citaId) {
   return data;
 }
 
-async function registrarCheckOut(citaId) {
+async function registrarCheckOut(citaId, observaciones) {
+  const texto = (observaciones || '').trim();
+  if (!texto) throw new Error('Escribe una observación de la visita antes de cerrarla');
+
   const { data: cita, error: errLectura } = await supabase
     .from('citas')
     .select('check_in_at')
@@ -123,6 +126,7 @@ async function registrarCheckOut(citaId) {
     .update({
       check_out_at: checkOutAt.toISOString(),
       duracion_real_min: duracionRealMin,
+      observaciones: texto,
       estado: 'completada',
     })
     .eq('id', citaId)

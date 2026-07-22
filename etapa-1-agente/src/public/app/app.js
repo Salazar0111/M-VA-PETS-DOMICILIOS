@@ -225,6 +225,7 @@ function abrirDetalle(id) {
 function pintarAccion() {
   const c = citaAbierta;
   const btn = $('btn-accion');
+  const obsWrap = $('d-obs-wrap');
   detenerCrono();
 
   if (esCompletada(c)) {
@@ -232,20 +233,29 @@ function pintarAccion() {
     btn.disabled = true;
     btn.className = 'btn btn-ghost';
     $('d-crono').style.display = 'none';
+    // Ya cerrada: mostramos la observación que quedó guardada, sin editar.
+    obsWrap.classList.remove('oculto');
+    $('d-obs').value = c.observaciones || '';
+    $('d-obs').disabled = true;
     return;
   }
 
   btn.disabled = false;
+  $('d-obs').disabled = false;
 
   if (enCurso(c)) {
     btn.textContent = 'Finalizar visita · Check-out';
     btn.className = 'btn btn-forest';
     $('d-crono').style.display = 'flex';
     iniciarCrono(new Date(c.check_in_at));
+    // La observación solo se pide al cerrar, cuando ya hubo consulta.
+    obsWrap.classList.remove('oculto');
+    $('d-obs').value = '';
   } else {
     btn.textContent = 'Llegué · Check-in';
     btn.className = 'btn btn-terra';
     $('d-crono').style.display = 'none';
+    obsWrap.classList.add('oculto');
   }
 }
 
@@ -272,11 +282,24 @@ $('btn-accion').addEventListener('click', async () => {
   const accion = enCurso(c) ? 'checkout' : 'checkin';
 
   aviso($('d-error'), '');
+
+  // Sin observación no se cierra la visita: es el dato que alimenta los
+  // informes de MÜVA. Se valida aquí antes de gastar una llamada al servidor.
+  const observaciones = $('d-obs').value.trim();
+  if (accion === 'checkout' && !observaciones) {
+    aviso($('d-error'), 'Escribe una observación de la visita antes de cerrarla.');
+    $('d-obs').focus();
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = accion === 'checkin' ? 'Registrando llegada…' : 'Cerrando visita…';
 
   try {
-    const actualizada = await api(`/api/veterinario/${accion}/${c.id}`, { method: 'POST' });
+    const actualizada = await api(`/api/veterinario/${accion}/${c.id}`, {
+      method: 'POST',
+      body: accion === 'checkout' ? JSON.stringify({ observaciones }) : undefined,
+    });
     const i = citas.findIndex((x) => x.id === c.id);
     if (i >= 0) citas[i] = { ...citas[i], ...actualizada };
     citaAbierta = citas[i];

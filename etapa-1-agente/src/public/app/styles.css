@@ -95,6 +95,12 @@ button{font-family:inherit;cursor:pointer;border:none}
 .fila .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:none}
 .fila .v{font-size:13px;color:var(--forest);font-weight:500;text-align:right}
 .mapa-link{display:block;margin:14px 24px 0;text-align:center;font-size:12.5px;color:var(--sage);text-decoration:none;padding:12px;border:1px dashed rgba(118,131,106,.4);border-radius:13px}
+.oculto{display:none!important}
+.obs-wrap{margin:18px 24px 0}
+.obs-label{display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.obs-req{font-size:8.5px;letter-spacing:.06em;background:rgba(190,124,96,.16);color:#9a5a3e;padding:2px 8px;border-radius:100px;text-transform:none}
+.obs-textarea{width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-family:inherit;font-size:14.5px;color:var(--forest);resize:vertical;outline:none}
+.obs-textarea:focus{border-color:var(--terra)}
 .det-accion{margin-top:auto;padding:18px 24px calc(26px + var(--safe-b));display:flex;flex-direction:column;gap:10px}
 .crono{display:flex;align-items:center;justify-content:center;gap:9px;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage)}
 .crono .pulso{width:8px;height:8px;border-radius:50%;background:var(--terra);animation:pulso 1.4s infinite}

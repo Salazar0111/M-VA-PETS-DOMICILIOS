@@ -30,7 +30,7 @@ router.post('/checkin/:citaId', async (req, res) => {
 // POST /api/veterinario/checkout/:citaId
 router.post('/checkout/:citaId', async (req, res) => {
   try {
-    const cita = await registrarCheckOut(req.params.citaId);
+    const cita = await registrarCheckOut(req.params.citaId, req.body?.observaciones);
     res.json(cita);
 
     // Al cerrar una visita puede quedar agenda libre: MÜVA debe enterarse.

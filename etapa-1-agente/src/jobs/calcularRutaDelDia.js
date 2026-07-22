@@ -22,9 +22,14 @@ async function calcularRutaDelDia(fechaISO) {
 }
 
 function fechaISODeMañana() {
-  const mañana = new Date();
+  // El servidor corre en UTC. Entre las 7pm y medianoche hora Bogotá,
+  // new Date() ya cae en el día siguiente en UTC, así que sumarle un día
+  // con setDate()/toISOString() se adelanta DOS días en vez de uno.
+  // Hay que calcular "mañana" sobre el calendario de Bogotá, no el del servidor.
+  const hoyBogota = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+  const mañana = new Date(`${hoyBogota}T12:00:00-05:00`);
   mañana.setDate(mañana.getDate() + 1);
-  return mañana.toISOString().split('T')[0];
+  return mañana.toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
 }
 
 module.exports = { calcularRutaDelDia, fechaISODeMañana };

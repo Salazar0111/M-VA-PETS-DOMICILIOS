@@ -41,7 +41,7 @@ function calcularDisponibilidad(citas, fechaISO) {
     .map((c) => {
       const inicio = new Date(c.fecha_hora_confirmada);
       const dur = Number(c.duracion_real_min) || DURACION_ESTIMADA_MIN;
-      return { inicio, fin: new Date(inicio.getTime() + dur * 60000) };
+      return { inicio, fin: new Date(inicio.getTime() + dur * 60000), mascotas: [c.nombre_mascota].filter(Boolean) };
     })
     .filter((b) => b.fin > abre && b.inicio < cierra)
     .sort((a, b) => a.inicio - b.inicio);
@@ -51,8 +51,9 @@ function calcularDisponibilidad(citas, fechaISO) {
     const ultimo = fusionados[fusionados.length - 1];
     if (ultimo && bloque.inicio <= ultimo.fin) {
       ultimo.fin = new Date(Math.max(ultimo.fin, bloque.fin));
+      ultimo.mascotas.push(...bloque.mascotas);
     } else {
-      fusionados.push({ ...bloque });
+      fusionados.push({ ...bloque, mascotas: [...bloque.mascotas] });
     }
   }
 
@@ -60,7 +61,12 @@ function calcularDisponibilidad(citas, fechaISO) {
   let cursor = abre;
   for (const b of fusionados) {
     if (b.inicio > cursor) bloques.push({ tipo: 'libre', inicio: cursor, fin: b.inicio });
-    bloques.push({ tipo: 'ocupado', inicio: b.inicio < abre ? abre : b.inicio, fin: b.fin > cierra ? cierra : b.fin });
+    bloques.push({
+      tipo: 'ocupado',
+      inicio: b.inicio < abre ? abre : b.inicio,
+      fin: b.fin > cierra ? cierra : b.fin,
+      mascotas: b.mascotas,
+    });
     cursor = b.fin > cursor ? b.fin : cursor;
   }
   if (cursor < cierra) bloques.push({ tipo: 'libre', inicio: cursor, fin: cierra });
@@ -77,6 +83,16 @@ function calcularDisponibilidad(citas, fechaISO) {
 
   const totalLibreMin = libres.reduce((s, b) => s + minutos(b.inicio, b.fin), 0);
 
+  // El frontend necesita distinguir POR QUÉ no hay "próximo libre": no es
+  // lo mismo que la jornada ya haya terminado a que esté toda ocupada.
+  // Mostrar "sin espacio" en ambos casos es lo que generaba la confusión.
+  let motivoSinLibre = null;
+  if (!proximoLibre) {
+    if (esHoy && ahora >= cierra) motivoSinLibre = 'jornada_finalizada';
+    else if (esHoy && ahora < abre) motivoSinLibre = null; // hay libre desde "abre", proximoLibre ya lo cubre
+    else motivoSinLibre = 'agenda_completa';
+  }
+
   return {
     jornada: { abre: abre.toISOString(), cierra: cierra.toISOString() },
     bloques: bloques.map((b) => ({
@@ -84,10 +100,12 @@ function calcularDisponibilidad(citas, fechaISO) {
       inicio: b.inicio.toISOString(),
       fin: b.fin.toISOString(),
       minutos: minutos(b.inicio, b.fin),
+      mascotas: b.mascotas || [],
     })),
     proximoLibre: proximoLibre
       ? { inicio: proximoLibre.inicio.toISOString(), fin: proximoLibre.fin.toISOString(), minutos: minutos(proximoLibre.inicio, proximoLibre.fin) }
       : null,
+    motivoSinLibre,
     totalLibreMin,
   };
 }
@@ -130,6 +148,7 @@ async function resumenDelDia(fechaISO) {
       canal: c.canal,
       estado: c.check_out_at ? 'completada' : c.check_in_at ? 'en_consulta' : 'programada',
       duracionRealMin: c.duracion_real_min == null ? null : Math.round(c.duracion_real_min),
+      observaciones: c.observaciones || null,
     })),
   };
 }

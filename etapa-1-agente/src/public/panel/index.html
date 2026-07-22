@@ -34,10 +34,10 @@
   <aside class="side">
     <div class="wm">müva<small>OPERACIÓN</small></div>
     <nav class="nav">
-      <button class="item on" type="button"><span class="ic">◧</span> Resumen</button>
-      <button class="item" type="button"><span class="ic">◔</span> Citas</button>
-      <button class="item" type="button"><span class="ic">✦</span> Veterinarios</button>
-      <button class="item" type="button"><span class="ic">↳</span> Rutas</button>
+      <button class="item on" type="button" id="nav-resumen"><span class="ic">◧</span> Resumen</button>
+      <button class="item proximamente" type="button" disabled title="Próximamente"><span class="ic">◔</span> Citas <span class="tag-prox">Pronto</span></button>
+      <button class="item proximamente" type="button" disabled title="Próximamente"><span class="ic">✦</span> Veterinarios <span class="tag-prox">Pronto</span></button>
+      <button class="item proximamente" type="button" disabled title="Próximamente"><span class="ic">↳</span> Rutas <span class="tag-prox">Pronto</span></button>
     </nav>
     <div class="foot">
       <div class="quien">
@@ -86,10 +86,15 @@
         <div class="card pad">
           <h2>Disponibilidad del veterinario</h2>
           <div class="cap" id="d-cap">Jornada 8:00 a.m. – 4:00 p.m.</div>
+          <div class="tl-legend">
+            <span class="it"><span class="sw ocupado"></span>Con cita</span>
+            <span class="it"><span class="sw libre"></span>Libre</span>
+            <span class="it"><span class="sw ahora"></span>Ahora</span>
+          </div>
           <div class="timeline" id="d-timeline"></div>
           <div class="tl-axis"><span>8 a.m.</span><span>10</span><span>12 m.</span><span>2 p.m.</span><span>4 p.m.</span></div>
-          <div class="nextfree">
-            <div class="lab">Bloque libre más próximo</div>
+          <div class="nextfree" id="d-nextfree">
+            <div class="lab" id="d-libre-lab">Bloque libre más próximo</div>
             <div class="big" id="d-libre">—</div>
           </div>
           <div class="notify" id="d-aviso"></div>

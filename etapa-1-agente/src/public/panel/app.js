@@ -25,6 +25,12 @@ function duracion(min) {
   return `${Math.floor(m / 60)}<small>h</small> ${String(m % 60).padStart(2, '0')}<small>m</small>`;
 }
 
+function escapeAttr(texto) {
+  const d = document.createElement('div');
+  d.textContent = texto || '';
+  return d.innerHTML.replace(/"/g, '&quot;');
+}
+
 function aviso(el, texto) {
   el.textContent = texto || '';
   el.classList.toggle('on', Boolean(texto));
@@ -179,28 +185,61 @@ function pintarCitas({ citas }) {
         <td class="zone">${c.direccion || '—'}</td>
         <td class="zone">${c.canal === 'instagram' ? 'Instagram' : 'WhatsApp'}</td>
         <td>${hora(c.hora)}</td>
-        <td><span class="st ${c.estado}"><span class="dot"></span>${etiqueta[c.estado]}</span></td>
+        <td><span class="st ${c.estado}"><span class="dot"></span>${etiqueta[c.estado]}</span>
+          ${c.observaciones ? `<span class="nota" title="${escapeAttr(c.observaciones)}">📝</span>` : ''}
+        </td>
       </tr>`
     )
     .join('');
 }
 
-function pintarDisponibilidad({ disponibilidad, avisoDisponibilidad }) {
-  const { bloques, proximoLibre, totalLibreMin, jornada } = disponibilidad;
+function pintarDisponibilidad({ disponibilidad, avisoDisponibilidad, fecha }) {
+  const { bloques, proximoLibre, totalLibreMin, jornada, motivoSinLibre } = disponibilidad;
   const total = new Date(jornada.cierra) - new Date(jornada.abre);
+  const ahora = new Date();
+  const esHoy = fecha === hoyISO();
 
   $('d-timeline').innerHTML = bloques
     .map((b) => {
-      const ancho = ((new Date(b.fin) - new Date(b.inicio)) / total) * 100;
-      const texto = ancho > 11 ? (b.tipo === 'libre' ? 'libre' : 'consulta') : '';
-      return `<div class="seg ${b.tipo}" style="width:${ancho}%" title="${b.tipo} ${hora(b.inicio)}–${hora(b.fin)}">${texto}</div>`;
+      const inicio = new Date(b.inicio);
+      const fin = new Date(b.fin);
+      const ancho = ((fin - inicio) / total) * 100;
+      const rango = `${hora(b.inicio)} – ${hora(b.fin)}`;
+
+      // Solo marcamos "ahora" cuando de verdad estamos viendo hoy y el
+      // instante cae dentro de este bloque; otro día no tiene sentido.
+      const marca =
+        esHoy && ahora >= inicio && ahora <= fin
+          ? `<div class="ahora-marca" style="left:${((ahora - inicio) / (fin - inicio)) * 100}%"></div>`
+          : '';
+
+      if (b.tipo === 'ocupado') {
+        const nombres = (b.mascotas || []).join(', ') || 'Consulta';
+        const texto = ancho > 9 ? `<span class="mascota">${nombres}</span><span class="rango">${rango}</span>` : '';
+        return `<div class="seg ocupado" style="width:${ancho}%" title="${nombres} · ${rango}">${texto}${marca}</div>`;
+      }
+      const texto = ancho > 7 ? 'libre' : '';
+      return `<div class="seg libre" style="width:${ancho}%" title="Libre · ${rango}">${texto}${marca}</div>`;
     })
     .join('');
 
-  $('d-cap').textContent = `Jornada 8:00 a.m. – 4:00 p.m. · ${Math.round(totalLibreMin)} min libres`;
-  $('d-libre').textContent = proximoLibre
-    ? `${hora(proximoLibre.inicio)} – ${hora(proximoLibre.fin)}`
-    : 'Sin espacio disponible';
+  $('d-cap').textContent = `Jornada 8:00 a.m. – 4:00 p.m. · ${Math.round(totalLibreMin)} min libres en total`;
+
+  const caja = $('d-nextfree');
+  caja.classList.remove('finalizada', 'completa');
+
+  if (proximoLibre) {
+    $('d-libre-lab').textContent = esHoy ? 'Próximo bloque libre' : 'Primer bloque libre del día';
+    $('d-libre').textContent = `${hora(proximoLibre.inicio)} – ${hora(proximoLibre.fin)} (${proximoLibre.minutos} min)`;
+  } else if (motivoSinLibre === 'jornada_finalizada') {
+    caja.classList.add('finalizada');
+    $('d-libre-lab').textContent = 'Jornada finalizada';
+    $('d-libre').textContent = 'La ventana de 8:00 a.m. – 4:00 p.m. ya terminó por hoy.';
+  } else {
+    caja.classList.add('completa');
+    $('d-libre-lab').textContent = 'Agenda completa';
+    $('d-libre').textContent = 'No quedan espacios libres en la jornada.';
+  }
 
   $('d-aviso').innerHTML = avisoDisponibilidad
     ? `🌿 <span><b>MÜVA fue notificado.</b> ${avisoDisponibilidad.mensaje}</span>`

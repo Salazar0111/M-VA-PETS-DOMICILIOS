@@ -121,6 +121,31 @@ $('form-login').addEventListener('submit', async (e) => {
 $('btn-salir').addEventListener('click', cerrarSesion);
 $('p-fecha').addEventListener('change', () => cargar());
 
+/* ---------------- navegación de secciones ---------------- */
+
+$('nav-resumen').addEventListener('click', () => {
+  $('nav-resumen').classList.add('on');
+  $('nav-informes').classList.remove('on');
+  $('vista-resumen').classList.remove('oculto');
+  $('vista-informes').classList.add('oculto');
+});
+
+$('nav-informes').addEventListener('click', () => {
+  $('nav-informes').classList.add('on');
+  $('nav-resumen').classList.remove('on');
+  $('vista-informes').classList.remove('oculto');
+  $('vista-resumen').classList.add('oculto');
+  cargarInformes();
+});
+
+document.querySelectorAll('.periodo-btn').forEach((btn) =>
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.periodo-btn').forEach((b) => b.classList.remove('on'));
+    btn.classList.add('on');
+    cargarInformes();
+  })
+);
+
 /* ---------------- pintar ---------------- */
 
 async function cargar(silencioso = false) {
@@ -257,6 +282,70 @@ function pintarSemana({ dias }) {
       </div>`
     )
     .join('');
+}
+
+/* ---------------- informes ---------------- */
+
+const plata = (n) => `$${Math.round(n || 0).toLocaleString('es-CO')}`;
+
+const NOMBRE_METODO = { efectivo: 'Efectivo', transferencia: 'Transferencia', link_pago: 'Link de pago', sin_registrar: 'Sin registrar' };
+const NOMBRE_PERIODO = { dia: 'Hoy', semana: 'Esta semana', mes: 'Este mes' };
+
+async function cargarInformes() {
+  const periodo = document.querySelector('.periodo-btn.on')?.dataset.periodo || 'dia';
+  const fecha = $('p-fecha').value || hoyISO();
+
+  $('i-especie').innerHTML = '<tr><td><div class="cargando"><div class="spinner"></div>Cargando…</div></td></tr>';
+  $('i-pago').innerHTML = '';
+
+  try {
+    const d = await api(`/api/muva/informes/${periodo}/${fecha}`);
+    pintarInformes(d);
+  } catch (err) {
+    $('i-especie').innerHTML = `<tr><td><div class="vacio">${err.message}</div></td></tr>`;
+  }
+}
+
+function pintarInformes(d) {
+  $('i-visitas').textContent = d.totales.visitas;
+  $('i-ingresos').textContent = plata(d.totales.ingresos);
+  $('i-ticket').textContent = plata(d.totales.ticketPromedio);
+
+  const rango = d.periodo.desde === d.periodo.hasta ? '' : ` · ${d.periodo.desde} a ${d.periodo.hasta}`;
+  $('i-periodo-txt').textContent = `${NOMBRE_PERIODO[d.periodo.tipo]}${rango}`;
+
+  if (!d.porEspecie.length) {
+    $('i-especie').innerHTML = '<tr><td><div class="vacio">🌿 Sin visitas atendidas en este periodo.</div></td></tr>';
+  } else {
+    const max = Math.max(...d.porEspecie.map((e) => e.visitas));
+    $('i-especie').innerHTML = d.porEspecie
+      .map(
+        (e) => `<tr><td>
+          <div class="i-row" style="padding-left:0;padding-right:0;border:none">
+            <span class="nom">${e.especie}</span>
+            <div class="i-bar-wrap"><div class="i-bar" style="width:${(e.visitas / max) * 100}%"></div></div>
+            <span class="cant">${e.visitas}</span>
+          </div>
+        </td></tr>`
+      )
+      .join('');
+  }
+
+  if (!d.porMetodoPago.length) {
+    $('i-pago').innerHTML = '<tr><td><div class="vacio">🌿 Sin pagos registrados en este periodo.</div></td></tr>';
+  } else {
+    $('i-pago').innerHTML = d.porMetodoPago
+      .map(
+        (m) => `<tr><td>
+          <div class="i-row" style="padding-left:0;padding-right:0;border:none">
+            <span class="nom">${NOMBRE_METODO[m.metodo] || m.metodo}</span>
+            <span class="cant">${m.visitas} visitas</span>
+            <span class="plata">${plata(m.ingresos)}</span>
+          </div>
+        </td></tr>`
+      )
+      .join('');
+  }
 }
 
 /* ---------------- arranque ---------------- */

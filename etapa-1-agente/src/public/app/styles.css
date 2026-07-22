@@ -101,6 +101,14 @@ button{font-family:inherit;cursor:pointer;border:none}
 .obs-req{font-size:8.5px;letter-spacing:.06em;background:rgba(190,124,96,.16);color:#9a5a3e;padding:2px 8px;border-radius:100px;text-transform:none}
 .obs-textarea{width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-family:inherit;font-size:14.5px;color:var(--forest);resize:vertical;outline:none}
 .obs-textarea:focus{border-color:var(--terra)}
+.obs-fila2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.obs-campo{min-width:0}
+.obs-input{width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 13px;font-family:inherit;font-size:14.5px;color:var(--forest);outline:none;appearance:none}
+.obs-input:focus{border-color:var(--terra)}
+.obs-valor-wrap{position:relative;display:flex;align-items:center}
+.obs-prefijo{position:absolute;left:13px;color:var(--muted);font-size:14.5px;pointer-events:none}
+.obs-valor-wrap .obs-input{padding-left:26px}
+select.obs-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8577'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center}
 .det-accion{margin-top:auto;padding:18px 24px calc(26px + var(--safe-b));display:flex;flex-direction:column;gap:10px}
 .crono{display:flex;align-items:center;justify-content:center;gap:9px;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage)}
 .crono .pulso{width:8px;height:8px;border-radius:50%;background:var(--terra);animation:pulso 1.4s infinite}

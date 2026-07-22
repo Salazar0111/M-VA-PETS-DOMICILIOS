@@ -189,6 +189,73 @@ async function visitasDeLaSemana(fechaISO) {
   }));
 }
 
+/* ---------- informes (diario / semanal / mensual) ---------- */
+
+// Rango [desde, hasta] en Bogotá para cada tipo de periodo, anclado a
+// la fecha de referencia (normalmente "hoy").
+function rangoDePeriodo(tipo, fechaISO) {
+  const ref = enBogota(fechaISO, 12); // mediodía evita problemas de borde por DST/redondeo
+  if (tipo === 'dia') return { desde: fechaISO, hasta: fechaISO };
+
+  if (tipo === 'semana') {
+    const diaSemana = (ref.getUTCDay() + 6) % 7; // 0 = lunes
+    const lunes = new Date(ref.getTime() - diaSemana * 86400000);
+    const viernes = new Date(lunes.getTime() + 4 * 86400000);
+    return {
+      desde: lunes.toLocaleDateString('en-CA', { timeZone: 'America/Bogota' }),
+      hasta: viernes.toLocaleDateString('en-CA', { timeZone: 'America/Bogota' }),
+    };
+  }
+
+  // mes
+  const [y, m] = fechaISO.split('-').map(Number);
+  const ultimoDia = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  return { desde: `${fechaISO.slice(0, 7)}-01`, hasta: `${fechaISO.slice(0, 7)}-${String(ultimoDia).padStart(2, '0')}` };
+}
+
+async function informesPeriodo(tipo, fechaISO) {
+  const { desde, hasta } = rangoDePeriodo(tipo, fechaISO);
+
+  const { data, error } = await supabase
+    .from('citas')
+    .select('especie, valor_servicio, metodo_pago, check_out_at')
+    .eq('estado', 'completada')
+    .gte('check_out_at', `${desde}T00:00:00${OFFSET}`)
+    .lte('check_out_at', `${hasta}T23:59:59${OFFSET}`);
+
+  if (error) throw error;
+  const visitas = data || [];
+
+  const ingresos = visitas.reduce((s, c) => s + (Number(c.valor_servicio) || 0), 0);
+
+  const porEspecie = {};
+  const porMetodoPago = {};
+  for (const c of visitas) {
+    const esp = c.especie || 'Sin especificar';
+    porEspecie[esp] = (porEspecie[esp] || 0) + 1;
+
+    const met = c.metodo_pago || 'sin_registrar';
+    if (!porMetodoPago[met]) porMetodoPago[met] = { visitas: 0, ingresos: 0 };
+    porMetodoPago[met].visitas += 1;
+    porMetodoPago[met].ingresos += Number(c.valor_servicio) || 0;
+  }
+
+  return {
+    periodo: { tipo, desde, hasta },
+    totales: {
+      visitas: visitas.length,
+      ingresos,
+      ticketPromedio: visitas.length ? Math.round(ingresos / visitas.length) : 0,
+    },
+    porEspecie: Object.entries(porEspecie)
+      .map(([especie, visitas]) => ({ especie, visitas }))
+      .sort((a, b) => b.visitas - a.visitas),
+    porMetodoPago: Object.entries(porMetodoPago)
+      .map(([metodo, v]) => ({ metodo, ...v }))
+      .sort((a, b) => b.ingresos - a.ingresos),
+  };
+}
+
 /* ---------- notificación de disponibilidad a MÜVA ---------- */
 
 async function notificarDisponibilidad(fechaISO) {
@@ -226,6 +293,7 @@ async function ultimaNotificacion(fechaISO) {
 module.exports = {
   resumenDelDia,
   visitasDeLaSemana,
+  informesPeriodo,
   calcularDisponibilidad,
   notificarDisponibilidad,
   ultimaNotificacion,

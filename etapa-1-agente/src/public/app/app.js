@@ -233,24 +233,32 @@ function pintarAccion() {
     btn.disabled = true;
     btn.className = 'btn btn-ghost';
     $('d-crono').style.display = 'none';
-    // Ya cerrada: mostramos la observación que quedó guardada, sin editar.
+    // Ya cerrada: mostramos lo que quedó guardado, sin editar.
     obsWrap.classList.remove('oculto');
     $('d-obs').value = c.observaciones || '';
     $('d-obs').disabled = true;
+    $('d-valor').value = c.valor_servicio ?? '';
+    $('d-valor').disabled = true;
+    $('d-pago').value = c.metodo_pago || '';
+    $('d-pago').disabled = true;
     return;
   }
 
   btn.disabled = false;
   $('d-obs').disabled = false;
+  $('d-valor').disabled = false;
+  $('d-pago').disabled = false;
 
   if (enCurso(c)) {
     btn.textContent = 'Finalizar visita · Check-out';
     btn.className = 'btn btn-forest';
     $('d-crono').style.display = 'flex';
     iniciarCrono(new Date(c.check_in_at));
-    // La observación solo se pide al cerrar, cuando ya hubo consulta.
+    // Estos datos solo se piden al cerrar, cuando ya hubo consulta.
     obsWrap.classList.remove('oculto');
     $('d-obs').value = '';
+    $('d-valor').value = '';
+    $('d-pago').value = '';
   } else {
     btn.textContent = 'Llegué · Check-in';
     btn.className = 'btn btn-terra';
@@ -283,13 +291,28 @@ $('btn-accion').addEventListener('click', async () => {
 
   aviso($('d-error'), '');
 
-  // Sin observación no se cierra la visita: es el dato que alimenta los
-  // informes de MÜVA. Se valida aquí antes de gastar una llamada al servidor.
-  const observaciones = $('d-obs').value.trim();
-  if (accion === 'checkout' && !observaciones) {
-    aviso($('d-error'), 'Escribe una observación de la visita antes de cerrarla.');
-    $('d-obs').focus();
-    return;
+  // Observación, valor y método de pago son obligatorios para cerrar la
+  // visita: son el dato que alimenta los informes de MÜVA. Se valida aquí
+  // antes de gastar una llamada al servidor.
+  let cuerpo;
+  if (accion === 'checkout') {
+    const observaciones = $('d-obs').value.trim();
+    const valorServicio = $('d-valor').value;
+    const metodoPago = $('d-pago').value;
+
+    if (!observaciones) {
+      aviso($('d-error'), 'Escribe una observación de la visita antes de cerrarla.');
+      return $('d-obs').focus();
+    }
+    if (!valorServicio || Number(valorServicio) <= 0) {
+      aviso($('d-error'), 'Ingresa el valor cobrado por la consulta.');
+      return $('d-valor').focus();
+    }
+    if (!metodoPago) {
+      aviso($('d-error'), 'Selecciona el método de pago.');
+      return $('d-pago').focus();
+    }
+    cuerpo = JSON.stringify({ observaciones, valorServicio, metodoPago });
   }
 
   btn.disabled = true;
@@ -298,7 +321,7 @@ $('btn-accion').addEventListener('click', async () => {
   try {
     const actualizada = await api(`/api/veterinario/${accion}/${c.id}`, {
       method: 'POST',
-      body: accion === 'checkout' ? JSON.stringify({ observaciones }) : undefined,
+      body: cuerpo,
     });
     const i = citas.findIndex((x) => x.id === c.id);
     if (i >= 0) citas[i] = { ...citas[i], ...actualizada };

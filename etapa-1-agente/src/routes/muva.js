@@ -1,5 +1,5 @@
 const express = require('express');
-const { resumenDelDia, visitasDeLaSemana, ultimaNotificacion } = require('../services/operacion');
+const { resumenDelDia, visitasDeLaSemana, informesPeriodo, ultimaNotificacion } = require('../services/operacion');
 
 const router = express.Router();
 
@@ -20,6 +20,18 @@ router.get('/resumen/:fecha', async (req, res) => {
 router.get('/semana/:fecha', async (req, res) => {
   try {
     res.json({ dias: await visitasDeLaSemana(req.params.fecha) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/muva/informes/:tipo/:fecha — tipo: dia | semana | mes
+router.get('/informes/:tipo/:fecha', async (req, res) => {
+  if (!['dia', 'semana', 'mes'].includes(req.params.tipo)) {
+    return res.status(400).json({ error: 'tipo debe ser dia, semana o mes' });
+  }
+  try {
+    res.json(await informesPeriodo(req.params.tipo, req.params.fecha));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -145,6 +145,19 @@ tbody tr:hover{background:rgba(118,131,106,.05)}
 .bar .v{font-family:var(--font-display);font-weight:500;font-size:13px;color:var(--forest)}
 .bar .d{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 
+/* ---------- Informes ---------- */
+.periodo-sel{display:flex;gap:8px;margin-bottom:4px}
+.periodo-btn{background:var(--paper);border:1px solid var(--line);border-radius:100px;padding:9px 18px;font-size:12.5px;color:var(--muted);font-weight:500}
+.periodo-btn:hover{color:var(--forest)}
+.periodo-btn.on{background:var(--forest);color:#f2ecdf;border-color:var(--forest)}
+.i-row{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid var(--line-2)}
+.i-row:first-child{border-top:none}
+.i-row .nom{font-size:13px;color:var(--forest);font-weight:500}
+.i-row .cant{font-size:12px;color:var(--muted)}
+.i-row .plata{font-family:var(--font-display);font-size:14px;color:var(--forest);font-weight:500}
+.i-bar-wrap{flex:1;margin:0 14px;height:6px;background:var(--cream-2);border-radius:100px;overflow:hidden}
+.i-bar{height:100%;background:var(--camel);border-radius:100px}
+
 .vacio{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
 .cargando{padding:40px;text-align:center;color:var(--muted);font-size:13px}
 .spinner{width:24px;height:24px;border:2px solid var(--cream);border-top-color:var(--terra);border-radius:50%;margin:0 auto 12px;animation:giro .8s linear infinite}

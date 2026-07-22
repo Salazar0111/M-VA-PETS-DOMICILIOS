@@ -35,7 +35,7 @@
     <div class="wm">müva<small>OPERACIÓN</small></div>
     <nav class="nav">
       <button class="item on" type="button" id="nav-resumen"><span class="ic">◧</span> Resumen</button>
-      <button class="item proximamente" type="button" disabled title="Próximamente"><span class="ic">◔</span> Citas <span class="tag-prox">Pronto</span></button>
+      <button class="item" type="button" id="nav-informes"><span class="ic">◔</span> Informes</button>
       <button class="item proximamente" type="button" disabled title="Próximamente"><span class="ic">✦</span> Veterinarios <span class="tag-prox">Pronto</span></button>
       <button class="item proximamente" type="button" disabled title="Próximamente"><span class="ic">↳</span> Rutas <span class="tag-prox">Pronto</span></button>
     </nav>
@@ -64,6 +64,7 @@
       </div>
     </div>
 
+    <div id="vista-resumen">
     <div class="kpis">
       <div class="kpi"><div class="l"><span class="sq" style="background:var(--forest)"></span>Visitas del día</div><div class="n" id="k-visitas">—</div><div class="sub">Ventana 8:00 a.m. – 4:00 p.m.</div></div>
       <div class="kpi"><div class="l"><span class="sq" style="background:var(--ok)"></span>Completadas</div><div class="n" id="k-completadas">—</div><div class="sub" id="k-completadas-sub">—</div></div>
@@ -104,6 +105,32 @@
           <h2>Esta semana</h2>
           <div class="cap">Visitas agendadas por día</div>
           <div class="bars" id="s-bars"></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div id="vista-informes" class="oculto">
+      <div class="periodo-sel">
+        <button class="periodo-btn on" type="button" data-periodo="dia">Hoy</button>
+        <button class="periodo-btn" type="button" data-periodo="semana">Esta semana</button>
+        <button class="periodo-btn" type="button" data-periodo="mes">Este mes</button>
+      </div>
+
+      <div class="kpis" id="i-kpis-wrap">
+        <div class="kpi"><div class="l"><span class="sq" style="background:var(--forest)"></span>Visitas atendidas</div><div class="n" id="i-visitas">—</div><div class="sub" id="i-periodo-txt">—</div></div>
+        <div class="kpi"><div class="l"><span class="sq" style="background:var(--ok)"></span>Ingresos totales</div><div class="n" id="i-ingresos">—</div><div class="sub">Suma de valores cobrados</div></div>
+        <div class="kpi"><div class="l"><span class="sq" style="background:var(--terra)"></span>Ticket promedio</div><div class="n" id="i-ticket">—</div><div class="sub">Por visita atendida</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="head"><h2>Por especie</h2><span class="meta">Visitas atendidas</span></div>
+          <div class="tabla-wrap"><table><tbody id="i-especie"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="head"><h2>Por método de pago</h2><span class="meta">Visitas e ingresos</span></div>
+          <div class="tabla-wrap"><table><tbody id="i-pago"></tbody></table></div>
         </div>
       </div>
     </div>

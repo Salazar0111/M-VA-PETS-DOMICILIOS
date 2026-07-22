@@ -78,6 +78,25 @@
   <div class="obs-wrap oculto" id="d-obs-wrap">
     <label for="d-obs" class="obs-label">Observaciones de la visita <span class="obs-req">obligatorio</span></label>
     <textarea id="d-obs" class="obs-textarea" rows="4" placeholder="Motivo consultado, hallazgos, tratamiento indicado…"></textarea>
+
+    <div class="obs-fila2">
+      <div class="obs-campo">
+        <label for="d-valor" class="obs-label">Valor cobrado <span class="obs-req">obligatorio</span></label>
+        <div class="obs-valor-wrap">
+          <span class="obs-prefijo">$</span>
+          <input id="d-valor" class="obs-input" type="number" inputmode="numeric" min="0" step="1000" placeholder="80.000">
+        </div>
+      </div>
+      <div class="obs-campo">
+        <label for="d-pago" class="obs-label">Método de pago <span class="obs-req">obligatorio</span></label>
+        <select id="d-pago" class="obs-input">
+          <option value="" selected disabled>Elegir…</option>
+          <option value="efectivo">Efectivo</option>
+          <option value="transferencia">Transferencia / Nequi / Daviplata</option>
+          <option value="link_pago">Link de pago</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <div class="det-accion">

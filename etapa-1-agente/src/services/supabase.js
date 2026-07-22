@@ -102,9 +102,15 @@ async function registrarCheckIn(citaId) {
   return data;
 }
 
-async function registrarCheckOut(citaId, observaciones) {
+const METODOS_PAGO = ['efectivo', 'transferencia', 'link_pago'];
+
+async function registrarCheckOut(citaId, { observaciones, metodoPago, valorServicio } = {}) {
   const texto = (observaciones || '').trim();
   if (!texto) throw new Error('Escribe una observación de la visita antes de cerrarla');
+  if (!METODOS_PAGO.includes(metodoPago)) throw new Error('Selecciona un método de pago válido');
+
+  const valor = Number(valorServicio);
+  if (!Number.isFinite(valor) || valor <= 0) throw new Error('Ingresa el valor cobrado por la consulta');
 
   const { data: cita, error: errLectura } = await supabase
     .from('citas')
@@ -127,6 +133,8 @@ async function registrarCheckOut(citaId, observaciones) {
       check_out_at: checkOutAt.toISOString(),
       duracion_real_min: duracionRealMin,
       observaciones: texto,
+      metodo_pago: metodoPago,
+      valor_servicio: valor,
       estado: 'completada',
     })
     .eq('id', citaId)
@@ -138,6 +146,7 @@ async function registrarCheckOut(citaId, observaciones) {
 }
 
 module.exports = {
+  METODOS_PAGO,
   crearCita,
   actualizarEventoVeterinario,
   obtenerCitasDelDia,

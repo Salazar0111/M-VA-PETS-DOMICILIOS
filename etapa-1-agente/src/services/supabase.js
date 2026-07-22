@@ -3,12 +3,79 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY);
 
+// Un cliente se identifica por canal+identificador (el único dato estable
+// entre conversaciones). Si ya existe, lo reutilizamos y de paso
+// actualizamos el nombre por si escribió distinto la segunda vez.
+async function buscarOCrearCliente(canal, identificador, nombre, telefono) {
+  const { data: existente, error: errBusqueda } = await supabase
+    .from('clientes')
+    .select('*')
+    .eq('canal', canal)
+    .eq('identificador', identificador)
+    .maybeSingle();
+  if (errBusqueda) throw errBusqueda;
+
+  if (existente) {
+    const { data, error } = await supabase
+      .from('clientes')
+      .update({ nombre, telefono: telefono || existente.telefono, actualizado_en: new Date().toISOString() })
+      .eq('id', existente.id)
+      .select()
+      .single();
+    if (error) throw error;
+    return { cliente: data, esNuevo: false };
+  }
+
+  const { data, error } = await supabase
+    .from('clientes')
+    .insert({ canal, identificador, nombre, telefono })
+    .select()
+    .single();
+  if (error) throw error;
+  return { cliente: data, esNuevo: true };
+}
+
+// Mismo cliente + mismo nombre de mascota (sin distinguir mayúsculas) =
+// la misma mascota, y por tanto el mismo historial. Nombre distinto =
+// registro nuevo: es la "salvedad" de que no es el mismo paciente.
+async function buscarOCrearMascota(clienteId, nombre, especie) {
+  const { data: existente, error: errBusqueda } = await supabase
+    .from('mascotas')
+    .select('*')
+    .eq('cliente_id', clienteId)
+    .ilike('nombre', nombre)
+    .maybeSingle();
+  if (errBusqueda) throw errBusqueda;
+
+  if (existente) return { mascota: existente, esNueva: false };
+
+  const { data, error } = await supabase
+    .from('mascotas')
+    .insert({ cliente_id: clienteId, nombre, especie })
+    .select()
+    .single();
+  if (error) throw error;
+  return { mascota: data, esNueva: true };
+}
+
 async function crearCita(datos) {
+  // El teléfono solo lo conocemos con certeza cuando el canal es WhatsApp:
+  // ahí el identificador de contacto YA ES el número. Por Instagram no
+  // hay número disponible salvo que el cliente lo escriba en el chat.
+  const telefono = datos.canal === 'whatsapp' ? datos.contactoId : null;
+
+  const { cliente } = await buscarOCrearCliente(datos.canal, datos.contactoId, datos.nombreDueno, telefono);
+  const { mascota } = await buscarOCrearMascota(cliente.id, datos.nombreMascota, datos.especie);
+
   const { data, error } = await supabase
     .from('citas')
     .insert({
       canal: datos.canal,
       contacto_id: datos.contactoId,
+      cliente_id: cliente.id,
+      mascota_id: mascota.id,
+      nombre_dueno: datos.nombreDueno,
+      telefono_contacto: telefono,
       nombre_mascota: datos.nombreMascota,
       especie: datos.especie,
       direccion: datos.direccion,

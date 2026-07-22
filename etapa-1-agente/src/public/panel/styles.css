@@ -158,7 +158,8 @@ tbody tr:hover{background:rgba(118,131,106,.05)}
 .bar .d{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 
 /* ---------- Informes ---------- */
-.periodo-sel{display:flex;gap:8px;margin-bottom:4px}
+.informes-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+.periodo-sel{display:flex;gap:8px;flex-wrap:wrap}
 .periodo-btn{background:var(--paper);border:1px solid var(--line);border-radius:100px;padding:9px 18px;font-size:12.5px;color:var(--muted);font-weight:500}
 .periodo-btn:hover{color:var(--forest)}
 .periodo-btn.on{background:var(--forest);color:#f2ecdf;border-color:var(--forest)}
@@ -169,6 +170,37 @@ tbody tr:hover{background:rgba(118,131,106,.05)}
 .i-row .plata{font-family:var(--font-display);font-size:14px;color:var(--forest);font-weight:500}
 .i-bar-wrap{flex:1;margin:0 14px;height:6px;background:var(--cream-2);border-radius:100px;overflow:hidden}
 .i-bar{height:100%;background:var(--camel);border-radius:100px}
+
+.btn-exportar{background:var(--forest);color:#f2ecdf;border:none;border-radius:100px;padding:10px 20px;font-size:12.5px;font-weight:500;letter-spacing:.02em}
+.btn-exportar:hover{filter:brightness(1.1)}
+.btn-exportar[disabled]{opacity:.55;pointer-events:none}
+
+.rango-wrap{display:flex;align-items:flex-end;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:14px}
+.campo-fecha{display:flex;flex-direction:column;gap:5px}
+.campo-fecha label{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.campo-fecha input{border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-family:inherit;font-size:13px;color:var(--forest);background:#fff}
+.btn-aplicar{background:var(--terra);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12.5px;font-weight:500}
+
+/* ---------- Botón de historial + modal ---------- */
+.btn-hist{margin-left:8px;background:none;border:none;color:var(--sage);font-size:11px;cursor:pointer;text-decoration:underline;padding:0}
+.btn-hist:hover{color:var(--forest)}
+
+.modal-fondo{position:fixed;inset:0;background:rgba(44,49,34,.42);display:flex;align-items:center;justify-content:center;z-index:50;padding:24px}
+.modal-caja{background:var(--paper);border-radius:20px;max-width:560px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 30px 70px -20px rgba(44,49,34,.5)}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 24px 16px;border-bottom:1px solid var(--line-2)}
+.modal-nombre{font-family:var(--font-display);font-weight:500;font-size:20px;color:var(--forest)}
+.modal-tel{font-size:12px;color:var(--muted);margin-top:3px}
+.modal-cerrar{background:var(--cream-2);border:none;width:30px;height:30px;border-radius:50%;color:var(--forest);font-size:13px;flex:none}
+.modal-cuerpo{overflow-y:auto;padding:18px 24px 24px}
+
+.hist-mascota{margin-bottom:18px}
+.hist-mascota:last-child{margin-bottom:0}
+.hist-mascota h3{font-family:var(--font-display);font-weight:500;font-size:15.5px;color:var(--forest);margin-bottom:2px}
+.hist-mascota .esp{font-size:11px;color:var(--muted);margin-bottom:10px}
+.hist-visita{border-left:2px solid var(--line);padding:2px 0 10px 14px;margin-left:2px;position:relative}
+.hist-visita::before{content:'';position:absolute;left:-4.5px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--camel)}
+.hist-visita .fila-top{display:flex;justify-content:space-between;font-size:12px;color:var(--forest);font-weight:500}
+.hist-visita .txt{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
 
 .vacio{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
 .cargando{padding:40px;text-align:center;color:var(--muted);font-size:13px}

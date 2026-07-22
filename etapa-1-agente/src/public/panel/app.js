@@ -156,9 +156,97 @@ document.querySelectorAll('.periodo-btn').forEach((btn) =>
   btn.addEventListener('click', () => {
     document.querySelectorAll('.periodo-btn').forEach((b) => b.classList.remove('on'));
     btn.classList.add('on');
+
+    const esRango = btn.dataset.periodo === 'rango';
+    $('rango-wrap').classList.toggle('oculto', !esRango);
+    if (esRango) {
+      if (!$('rango-desde').value) $('rango-desde').value = hoyISO();
+      if (!$('rango-hasta').value) $('rango-hasta').value = hoyISO();
+      return; // se carga al pulsar "Aplicar", no automáticamente
+    }
     cargarInformes();
   })
 );
+
+$('btn-aplicar-rango').addEventListener('click', () => cargarInformes());
+
+$('btn-exportar').addEventListener('click', async () => {
+  if (!ultimoRango) return;
+  const { desde, hasta } = ultimoRango;
+  const btn = $('btn-exportar');
+  btn.disabled = true;
+  btn.textContent = 'Generando…';
+
+  try {
+    const res = await fetch(`/api/muva/informes/exportar?desde=${desde}&hasta=${hasta}`, {
+      headers: { Authorization: `Bearer ${sesion.token}` },
+    });
+    if (!res.ok) throw new Error('No pudimos generar el archivo');
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `muva-informe-${desde}-a-${hasta}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    btn.textContent = '⬇ Descargar Excel';
+  } catch (err) {
+    console.error(err);
+    btn.textContent = 'Error al generar';
+    setTimeout(() => (btn.textContent = '⬇ Descargar Excel'), 2500);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* ---------------- historial de cliente ---------------- */
+
+async function abrirHistorial(telefono) {
+  $('hist-fondo').classList.remove('oculto');
+  $('hist-nombre').textContent = 'Cargando…';
+  $('hist-tel').textContent = telefono;
+  $('hist-cuerpo').innerHTML = '<div class="cargando"><div class="spinner"></div>Buscando antecedentes…</div>';
+
+  try {
+    const d = await api(`/api/muva/cliente?telefono=${encodeURIComponent(telefono)}`);
+    $('hist-nombre').textContent = d.cliente.nombre;
+    $('hist-tel').textContent = `${d.cliente.telefono} · ${d.totalVisitas} visita${d.totalVisitas === 1 ? '' : 's'} atendida${d.totalVisitas === 1 ? '' : 's'} en total`;
+
+    $('hist-cuerpo').innerHTML = d.mascotas
+      .map((m) => {
+        const visitas = m.visitas.filter((v) => v.estado === 'completada');
+        return `<div class="hist-mascota">
+          <h3>${m.nombre}</h3>
+          <div class="esp">${m.especie || 'Especie sin registrar'} · ${visitas.length} antecedente${visitas.length === 1 ? '' : 's'}</div>
+          ${
+            visitas.length
+              ? visitas
+                  .map(
+                    (v) => `<div class="hist-visita">
+                      <div class="fila-top"><span>${v.motivo || 'Consulta'}</span><span>${v.fecha ? fechaLarga(v.fecha.slice(0, 10)) : ''}</span></div>
+                      <div class="txt">${escapeAttr(v.observaciones || 'Sin observaciones registradas')}</div>
+                    </div>`
+                  )
+                  .join('')
+              : '<div class="hist-visita"><div class="txt">Sin visitas completadas todavía.</div></div>'
+          }
+        </div>`;
+      })
+      .join('');
+  } catch (err) {
+    $('hist-nombre').textContent = 'Sin antecedentes';
+    $('hist-tel').textContent = telefono;
+    $('hist-cuerpo').innerHTML = `<div class="vacio">🌿 ${err.message}</div>`;
+  }
+}
+
+$('hist-cerrar').addEventListener('click', () => $('hist-fondo').classList.add('oculto'));
+$('hist-fondo').addEventListener('click', (e) => {
+  if (e.target.id === 'hist-fondo') $('hist-fondo').classList.add('oculto');
+});
 
 /* ---------------- pintar ---------------- */
 
@@ -228,9 +316,13 @@ function pintarCitas({ citas }) {
     .map(
       (c) => `<tr>
         <td><span class="ord">${c.estado === 'completada' ? '✓' : c.orden ?? '·'}</span></td>
-        <td><div class="pet">${c.mascota || '—'}</div><div class="sub-c">${[c.especie, c.motivo].filter(Boolean).join(' · ')}</div></td>
-        <td class="zone">${c.direccion || '—'}</td>
-        <td class="zone">${c.canal === 'instagram' ? 'Instagram' : 'WhatsApp'}</td>
+        <td><div class="pet">${c.mascota || '—'}</div><div class="sub-c" title="${escapeAttr(c.direccion || '')}">${[c.especie, c.canal === 'instagram' ? 'Instagram' : 'WhatsApp'].filter(Boolean).join(' · ')}</div></td>
+        <td>
+          <div class="pet" style="font-size:13px">${c.nombreDueno || '—'}</div>
+          <div class="sub-c">${c.telefonoContacto || 'Sin teléfono'}</div>
+          ${c.telefonoContacto ? `<button class="btn-hist" type="button" data-telefono="${escapeAttr(c.telefonoContacto)}">Ver historial</button>` : ''}
+        </td>
+        <td class="zone">${c.motivo || '—'}</td>
         <td>${hora(c.hora)}</td>
         <td><span class="st ${c.estado}"><span class="dot"></span>${etiqueta[c.estado]}</span>
           ${c.observaciones ? `<span class="nota" title="${escapeAttr(c.observaciones)}">📝</span>` : ''}
@@ -238,6 +330,10 @@ function pintarCitas({ citas }) {
       </tr>`
     )
     .join('');
+
+  cuerpo.querySelectorAll('.btn-hist').forEach((btn) =>
+    btn.addEventListener('click', () => abrirHistorial(btn.dataset.telefono))
+  );
 }
 
 function pintarObservaciones({ citas }) {
@@ -332,17 +428,31 @@ function pintarSemana({ dias }) {
 /* ---------------- informes ---------------- */
 
 const NOMBRE_METODO = { efectivo: 'Efectivo', transferencia: 'Transferencia', link_pago: 'Link de pago', sin_registrar: 'Sin registrar' };
-const NOMBRE_PERIODO = { dia: 'Hoy', semana: 'Esta semana', mes: 'Este mes' };
+const NOMBRE_PERIODO = { dia: 'Hoy', semana: 'Esta semana', mes: 'Este mes', rango: 'Rango' };
+
+// Rango de fechas exacto del último informe pintado en pantalla. La
+// exportación lo reutiliza para no recalcular nada y garantizar que el
+// Excel descargado coincide siempre con lo que se está viendo.
+let ultimoRango = null;
 
 async function cargarInformes() {
   const periodo = document.querySelector('.periodo-btn.on')?.dataset.periodo || 'dia';
-  const fecha = $('p-fecha').value || hoyISO();
 
   $('i-especie').innerHTML = '<tr><td><div class="cargando"><div class="spinner"></div>Cargando…</div></td></tr>';
   $('i-pago').innerHTML = '';
 
   try {
-    const d = await api(`/api/muva/informes/${periodo}/${fecha}`);
+    let d;
+    if (periodo === 'rango') {
+      const desde = $('rango-desde').value;
+      const hasta = $('rango-hasta').value;
+      if (!desde || !hasta) throw new Error('Selecciona las dos fechas del rango');
+      if (desde > hasta) throw new Error('"Desde" no puede ser posterior a "Hasta"');
+      d = await api(`/api/muva/informes/rango?desde=${desde}&hasta=${hasta}`);
+    } else {
+      const fecha = $('p-fecha').value || hoyISO();
+      d = await api(`/api/muva/informes/${periodo}/${fecha}`);
+    }
     pintarInformes(d);
   } catch (err) {
     $('i-especie').innerHTML = `<tr><td><div class="vacio">${err.message}</div></td></tr>`;
@@ -350,6 +460,8 @@ async function cargarInformes() {
 }
 
 function pintarInformes(d) {
+  ultimoRango = { desde: d.periodo.desde, hasta: d.periodo.hasta };
+  $('btn-exportar').disabled = false;
   $('i-visitas').textContent = d.totales.visitas;
   $('i-ingresos').textContent = plata(d.totales.ingresos);
   $('i-ticket').textContent = plata(d.totales.ticketPromedio);

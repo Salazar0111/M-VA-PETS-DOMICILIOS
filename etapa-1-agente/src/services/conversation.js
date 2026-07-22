@@ -5,6 +5,7 @@ const sesiones = new Map();
 
 const PASOS = {
   INICIO: 'INICIO',
+  PEDIR_NOMBRE_DUENO: 'PEDIR_NOMBRE_DUENO',
   PEDIR_NOMBRE_MASCOTA: 'PEDIR_NOMBRE_MASCOTA',
   PEDIR_ESPECIE: 'PEDIR_ESPECIE',
   PEDIR_DIRECCION: 'PEDIR_DIRECCION',
@@ -16,7 +17,8 @@ const PASOS = {
 
 const MENSAJES = {
   BIENVENIDA:
-    '¡Hola! Soy el asistente de *MÜVA PETS* 🐾\nVoy a ayudarte a agendar tu cita veterinaria a domicilio.\n\n¿Cuál es el nombre de tu mascota?',
+    '¡Hola! Soy el asistente de *MÜVA PETS* 🐾\nVoy a ayudarte a agendar tu cita veterinaria a domicilio.\n\n¿Cuál es tu nombre completo?',
+  PEDIR_NOMBRE_MASCOTA: '¿Cuál es el nombre de tu mascota?',
   PEDIR_ESPECIE:
     '¿Qué tipo de animal es? (Ej: perro, gato, conejo...)',
   PEDIR_DIRECCION:
@@ -45,6 +47,12 @@ function avanzarConversacion(id, mensajeUsuario) {
 
   switch (paso) {
     case PASOS.INICIO:
+    case PASOS.PEDIR_NOMBRE_DUENO:
+      datos.nombreDueno = mensajeUsuario.trim();
+      sesion.paso = PASOS.PEDIR_NOMBRE_MASCOTA;
+      respuesta = MENSAJES.PEDIR_NOMBRE_MASCOTA;
+      break;
+
     case PASOS.PEDIR_NOMBRE_MASCOTA:
       datos.nombreMascota = mensajeUsuario.trim();
       sesion.paso = PASOS.PEDIR_ESPECIE;
@@ -74,6 +82,7 @@ function avanzarConversacion(id, mensajeUsuario) {
       sesion.paso = PASOS.CONFIRMAR;
       respuesta =
         `Perfecto, déjame confirmar tu cita:\n\n` +
+        `👤 *A nombre de:* ${datos.nombreDueno}\n` +
         `🐾 *Mascota:* ${datos.nombreMascota} (${datos.especie})\n` +
         `📍 *Dirección:* ${datos.direccion}\n` +
         `🏥 *Tipo:* ${datos.tipoConsulta}\n` +
@@ -88,7 +97,7 @@ function avanzarConversacion(id, mensajeUsuario) {
         respuesta =
           '✅ ¡Tu cita ha sido agendada! Un veterinario de MÜVA PETS se pondrá en contacto contigo para confirmarte la hora exacta. ¡Hasta pronto! 🐾';
       } else {
-        sesion.paso = PASOS.PEDIR_NOMBRE_MASCOTA;
+        sesion.paso = PASOS.PEDIR_NOMBRE_DUENO;
         sesion.datos = {};
         respuesta = '¡Sin problema! Empecemos de nuevo.\n\n' + MENSAJES.BIENVENIDA;
       }
@@ -103,7 +112,7 @@ function avanzarConversacion(id, mensajeUsuario) {
 }
 
 function iniciarAgendamiento(id) {
-  sesiones.set(id, { paso: PASOS.PEDIR_NOMBRE_MASCOTA, datos: {} });
+  sesiones.set(id, { paso: PASOS.PEDIR_NOMBRE_DUENO, datos: {} });
   return MENSAJES.BIENVENIDA;
 }
 

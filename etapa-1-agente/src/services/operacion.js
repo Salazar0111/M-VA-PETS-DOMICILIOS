@@ -153,6 +153,9 @@ async function resumenDelDia(fechaISO) {
       observaciones: c.observaciones || null,
       metodoPago: c.metodo_pago || null,
       valorServicio: c.valor_servicio == null ? null : Number(c.valor_servicio),
+      clienteId: c.cliente_id || null,
+      nombreDueno: c.nombre_dueno || null,
+      telefonoContacto: c.telefono_contacto || null,
     })),
   };
 }
@@ -217,19 +220,23 @@ function rangoDePeriodo(tipo, fechaISO) {
   return { desde: `${fechaISO.slice(0, 7)}-01`, hasta: `${fechaISO.slice(0, 7)}-${String(ultimoDia).padStart(2, '0')}` };
 }
 
-async function informesPeriodo(tipo, fechaISO) {
-  const { desde, hasta } = rangoDePeriodo(tipo, fechaISO);
-
+async function citasCompletadasEnRango(desde, hasta) {
   const { data, error } = await supabase
     .from('citas')
-    .select('especie, valor_servicio, metodo_pago, check_out_at')
+    .select(
+      'nombre_mascota, especie, nombre_dueno, telefono_contacto, tipo_consulta, direccion, ' +
+        'fecha_hora_confirmada, check_out_at, valor_servicio, metodo_pago, observaciones'
+    )
     .eq('estado', 'completada')
     .gte('check_out_at', `${desde}T00:00:00${OFFSET}`)
-    .lte('check_out_at', `${hasta}T23:59:59${OFFSET}`);
+    .lte('check_out_at', `${hasta}T23:59:59${OFFSET}`)
+    .order('check_out_at', { ascending: true });
 
   if (error) throw error;
-  const visitas = data || [];
+  return data || [];
+}
 
+function agregarInforme(visitas, periodo) {
   const ingresos = visitas.reduce((s, c) => s + (Number(c.valor_servicio) || 0), 0);
 
   const porEspecie = {};
@@ -245,7 +252,7 @@ async function informesPeriodo(tipo, fechaISO) {
   }
 
   return {
-    periodo: { tipo, desde, hasta },
+    periodo,
     totales: {
       visitas: visitas.length,
       ingresos,
@@ -257,6 +264,72 @@ async function informesPeriodo(tipo, fechaISO) {
     porMetodoPago: Object.entries(porMetodoPago)
       .map(([metodo, v]) => ({ metodo, ...v }))
       .sort((a, b) => b.ingresos - a.ingresos),
+  };
+}
+
+async function informesPeriodo(tipo, fechaISO) {
+  const { desde, hasta } = rangoDePeriodo(tipo, fechaISO);
+  const visitas = await citasCompletadasEnRango(desde, hasta);
+  return agregarInforme(visitas, { tipo, desde, hasta });
+}
+
+async function informesRango(desde, hasta) {
+  const visitas = await citasCompletadasEnRango(desde, hasta);
+  return agregarInforme(visitas, { tipo: 'rango', desde, hasta });
+}
+
+/* ---------- historial de clientes ---------- */
+
+// Busca por teléfono (clientes de WhatsApp) o directamente por cliente_id.
+// Devuelve el cliente, todas sus mascotas y el historial completo de
+// citas de cada una — así el veterinario ve los antecedentes reales.
+async function historialCliente({ telefono, clienteId }) {
+  let cliente;
+
+  if (clienteId) {
+    const { data, error } = await supabase.from('clientes').select('*').eq('id', clienteId).maybeSingle();
+    if (error) throw error;
+    cliente = data;
+  } else {
+    const { data, error } = await supabase.from('clientes').select('*').eq('telefono', telefono).maybeSingle();
+    if (error) throw error;
+    cliente = data;
+  }
+
+  if (!cliente) return null;
+
+  const { data: mascotas, error: errMascotas } = await supabase
+    .from('mascotas')
+    .select('*')
+    .eq('cliente_id', cliente.id)
+    .order('creado_en', { ascending: true });
+  if (errMascotas) throw errMascotas;
+
+  const { data: citas, error: errCitas } = await supabase
+    .from('citas')
+    .select('id, mascota_id, tipo_consulta, fecha_hora_confirmada, estado, observaciones, valor_servicio, metodo_pago')
+    .eq('cliente_id', cliente.id)
+    .order('fecha_hora_confirmada', { ascending: false });
+  if (errCitas) throw errCitas;
+
+  return {
+    cliente: { id: cliente.id, nombre: cliente.nombre, telefono: cliente.telefono, canal: cliente.canal },
+    mascotas: mascotas.map((m) => ({
+      id: m.id,
+      nombre: m.nombre,
+      especie: m.especie,
+      visitas: citas
+        .filter((c) => c.mascota_id === m.id)
+        .map((c) => ({
+          motivo: c.tipo_consulta,
+          fecha: c.fecha_hora_confirmada,
+          estado: c.estado,
+          observaciones: c.observaciones,
+          valorServicio: c.valor_servicio,
+          metodoPago: c.metodo_pago,
+        })),
+    })),
+    totalVisitas: citas.filter((c) => c.estado === 'completada').length,
   };
 }
 
@@ -298,6 +371,9 @@ module.exports = {
   resumenDelDia,
   visitasDeLaSemana,
   informesPeriodo,
+  informesRango,
+  citasCompletadasEnRango,
+  historialCliente,
   calcularDisponibilidad,
   notificarDisponibilidad,
   ultimaNotificacion,

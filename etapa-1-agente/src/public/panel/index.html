@@ -78,7 +78,7 @@
         <div class="head"><h2>Citas del día</h2><span class="meta" id="t-meta"></span></div>
         <div class="tabla-wrap">
           <table>
-            <thead><tr><th>#</th><th>Mascota</th><th>Dirección</th><th>Canal</th><th>Hora</th><th>Estado</th></tr></thead>
+            <thead><tr><th>#</th><th>Mascota</th><th>Dueño</th><th>Motivo</th><th>Hora</th><th>Estado</th></tr></thead>
             <tbody id="t-body"></tbody>
           </table>
         </div>
@@ -117,10 +117,20 @@
     </div>
 
     <div id="vista-informes" class="oculto">
-      <div class="periodo-sel">
-        <button class="periodo-btn on" type="button" data-periodo="dia">Hoy</button>
-        <button class="periodo-btn" type="button" data-periodo="semana">Esta semana</button>
-        <button class="periodo-btn" type="button" data-periodo="mes">Este mes</button>
+      <div class="informes-top">
+        <div class="periodo-sel">
+          <button class="periodo-btn on" type="button" data-periodo="dia">Hoy</button>
+          <button class="periodo-btn" type="button" data-periodo="semana">Esta semana</button>
+          <button class="periodo-btn" type="button" data-periodo="mes">Este mes</button>
+          <button class="periodo-btn" type="button" data-periodo="rango">Rango personalizado</button>
+        </div>
+        <button class="btn-exportar" type="button" id="btn-exportar" disabled>⬇ Descargar Excel</button>
+      </div>
+
+      <div class="rango-wrap oculto" id="rango-wrap">
+        <div class="campo-fecha"><label>Desde</label><input type="date" id="rango-desde"></div>
+        <div class="campo-fecha"><label>Hasta</label><input type="date" id="rango-hasta"></div>
+        <button class="btn-aplicar" type="button" id="btn-aplicar-rango">Aplicar</button>
       </div>
 
       <div class="kpis" id="i-kpis-wrap">
@@ -141,6 +151,19 @@
       </div>
     </div>
   </main>
+</div>
+
+<div class="modal-fondo oculto" id="hist-fondo">
+  <div class="modal-caja">
+    <div class="modal-head">
+      <div>
+        <div class="modal-nombre" id="hist-nombre">—</div>
+        <div class="modal-tel" id="hist-tel">—</div>
+      </div>
+      <button class="modal-cerrar" type="button" id="hist-cerrar" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-cuerpo" id="hist-cuerpo"></div>
+  </div>
 </div>
 
 <script src="/panel/app.js"></script>

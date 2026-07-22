@@ -24,18 +24,25 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+// Red primero, caché de respaldo. Con caché primero, una corrección de
+// estilos o de lógica no llegaría al veterinario hasta limpiar el navegador.
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
   // Datos siempre frescos y nunca en caché.
   if (url.pathname.startsWith('/api/')) return;
   if (e.request.method !== 'GET') return;
+  if (url.origin !== self.location.origin) return;
 
   e.respondWith(
-    caches.match(e.request).then(
-      (guardado) =>
-        guardado ||
-        fetch(e.request).catch(() => caches.match('/app/index.html'))
-    )
+    fetch(e.request)
+      .then((res) => {
+        if (res.ok) {
+          const copia = res.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, copia));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request).then((g) => g || caches.match('/app/index.html')))
   );
 });

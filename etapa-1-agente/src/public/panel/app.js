@@ -189,7 +189,11 @@ function pintarEstado({ veterinario, disponibilidad }) {
   $('p-vet-t2').textContent = ocupado
     ? `${veterinario.atendiendo.mascota} · desde ${hora(veterinario.atendiendo.desde)}`
     : 'Sin visita en curso';
-  $('p-prox').textContent = disponibilidad.proximoLibre ? hora(disponibilidad.proximoLibre.inicio) : 'Sin espacio';
+  $('p-prox').textContent = disponibilidad.proximoLibre
+    ? hora(disponibilidad.proximoLibre.inicio)
+    : disponibilidad.motivoSinLibre === 'jornada_finalizada'
+    ? 'Jornada finalizada'
+    : 'Agenda completa';
 }
 
 function pintarCitas({ citas }) {

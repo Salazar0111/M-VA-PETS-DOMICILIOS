@@ -44,7 +44,9 @@ async function api(ruta) {
   });
   if (res.status === 401) {
     cerrarSesion();
-    throw new Error('Tu sesión expiró. Ingresa de nuevo.');
+    const err = new Error('Tu sesión expiró. Ingresa de nuevo.');
+    err.sesionInvalida = true;
+    throw err;
   }
   const cuerpo = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(cuerpo.error || 'No pudimos cargar la información');
@@ -84,8 +86,20 @@ async function restaurarSesion() {
     sesion.usuario = await api('/api/auth/me');
     if (sesion.usuario.rol !== 'admin') return cerrarSesion();
     abrirPanel();
-  } catch {
-    cerrarSesion();
+  } catch (err) {
+    // Un 401 real ya cerró la sesión dentro de api(). Cualquier otra falla
+    // (red inestable, Railway despertando, un 500 pasajero) no debe forzar
+    // el login de nuevo ni borrar el token — solo reintentamos.
+    if (err.sesionInvalida) return;
+    $('v-login').classList.add('oculto');
+    $('v-panel').classList.remove('oculto');
+    $('t-body').innerHTML = `
+      <tr><td colspan="6">
+        <div class="vacio">📡 No pudimos conectar con el servidor.<br>${err.message}<br><br>
+          <button class="btn btn-ghost" id="btn-reintentar" type="button" style="width:auto;padding:10px 20px">Reintentar</button>
+        </div>
+      </td></tr>`;
+    $('btn-reintentar').addEventListener('click', restaurarSesion);
   }
 }
 
@@ -166,16 +180,20 @@ async function cargar(silencioso = false) {
     pintarCitas(resumen);
     pintarDisponibilidad(resumen);
     pintarSemana(semana);
+    pintarObservaciones(resumen);
   } catch (err) {
     $('t-body').innerHTML = `<tr><td colspan="6"><div class="vacio">${err.message}</div></td></tr>`;
   }
 }
+
+const plata = (n) => `$${Math.round(n || 0).toLocaleString('es-CO')}`;
 
 function pintarKPIs({ kpis }) {
   $('k-visitas').textContent = kpis.visitas;
   $('k-completadas').innerHTML = `${kpis.completadas}<small> / ${kpis.visitas}</small>`;
   $('k-completadas-sub').textContent =
     kpis.visitas - kpis.completadas > 0 ? `${kpis.visitas - kpis.completadas} pendientes` : 'Jornada al día';
+  $('k-facturado').textContent = plata(kpis.facturadoHoy);
   $('k-km').innerHTML = `${kpis.km}<small> km</small>`;
   $('k-km-sub').innerHTML = `${duracion(kpis.desplazamientoMin)} de desplazamiento`;
   $('k-prom').innerHTML = duracion(kpis.promedioMin);
@@ -218,6 +236,29 @@ function pintarCitas({ citas }) {
           ${c.observaciones ? `<span class="nota" title="${escapeAttr(c.observaciones)}">📝</span>` : ''}
         </td>
       </tr>`
+    )
+    .join('');
+}
+
+function pintarObservaciones({ citas }) {
+  const conNota = citas.filter((c) => c.observaciones);
+  $('obs-meta').textContent = conNota.length ? `${conNota.length} visitas con nota` : '';
+
+  if (!conNota.length) {
+    $('obs-lista').innerHTML = '<div class="vacio">🌿 Aún no hay observaciones registradas para este día.</div>';
+    return;
+  }
+
+  $('obs-lista').innerHTML = conNota
+    .map(
+      (c) => `<div class="obs-item">
+        <div class="quien">
+          <div class="pet">${c.mascota || '—'}</div>
+          <div class="meta">${hora(c.hora)} · ${NOMBRE_METODO[c.metodoPago] || 'Sin registrar'}</div>
+        </div>
+        <div class="texto">${escapeAttr(c.observaciones)}</div>
+        <div class="plata">${c.valorServicio ? plata(c.valorServicio) : '—'}</div>
+      </div>`
     )
     .join('');
 }
@@ -289,8 +330,6 @@ function pintarSemana({ dias }) {
 }
 
 /* ---------------- informes ---------------- */
-
-const plata = (n) => `$${Math.round(n || 0).toLocaleString('es-CO')}`;
 
 const NOMBRE_METODO = { efectivo: 'Efectivo', transferencia: 'Transferencia', link_pago: 'Link de pago', sin_registrar: 'Sin registrar' };
 const NOMBRE_PERIODO = { dia: 'Hoy', semana: 'Esta semana', mes: 'Este mes' };

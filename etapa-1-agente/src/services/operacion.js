@@ -121,6 +121,7 @@ async function resumenDelDia(fechaISO) {
   const km = citas.reduce((s, c) => s + (Number(c.distancia_km) || 0), 0);
   const desplazamientoMin = citas.reduce((s, c) => s + (Number(c.duracion_min) || 0), 0);
   const consultaMin = completadas.reduce((s, c) => s + (Number(c.duracion_real_min) || 0), 0);
+  const facturadoHoy = completadas.reduce((s, c) => s + (Number(c.valor_servicio) || 0), 0);
 
   return {
     fecha: fechaISO,
@@ -131,6 +132,7 @@ async function resumenDelDia(fechaISO) {
       desplazamientoMin: Math.round(desplazamientoMin),
       consultaMin: Math.round(consultaMin),
       promedioMin: completadas.length ? Math.round(consultaMin / completadas.length) : 0,
+      facturadoHoy: Math.round(facturadoHoy),
     },
     veterinario: {
       estado: enConsulta ? 'en_consulta' : 'disponible',
@@ -149,6 +151,8 @@ async function resumenDelDia(fechaISO) {
       estado: c.check_out_at ? 'completada' : c.check_in_at ? 'en_consulta' : 'programada',
       duracionRealMin: c.duracion_real_min == null ? null : Math.round(c.duracion_real_min),
       observaciones: c.observaciones || null,
+      metodoPago: c.metodo_pago || null,
+      valorServicio: c.valor_servicio == null ? null : Number(c.valor_servicio),
     })),
   };
 }

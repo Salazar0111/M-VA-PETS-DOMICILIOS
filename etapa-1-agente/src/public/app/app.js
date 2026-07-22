@@ -53,7 +53,9 @@ async function api(ruta, opciones = {}) {
 
   if (res.status === 401) {
     cerrarSesion();
-    throw new Error('Tu sesión expiró. Ingresa de nuevo.');
+    const err = new Error('Tu sesión expiró. Ingresa de nuevo.');
+    err.sesionInvalida = true;
+    throw err;
   }
 
   const cuerpo = await res.json().catch(() => ({}));
@@ -83,8 +85,18 @@ async function restaurarSesion() {
   try {
     sesion.usuario = await api('/api/auth/me');
     await cargarRuta();
-  } catch {
-    cerrarSesion();
+  } catch (err) {
+    // Un 401 real ya cerró la sesión dentro de api(). Cualquier otra falla
+    // (red inestable, Railway despertando, un 500 pasajero) NO debe botar
+    // al veterinario de la app ni borrar su token — solo reintentamos.
+    if (err.sesionInvalida) return;
+    mostrar('v-ruta');
+    $('lista-visitas').innerHTML = `
+      <div class="vacio">
+        <span class="em">📡</span>No pudimos conectar con el servidor.<br>${err.message}
+      </div>
+      <button class="btn btn-ghost" id="btn-reintentar" type="button" style="margin-top:14px">Reintentar</button>`;
+    $('btn-reintentar').addEventListener('click', restaurarSesion);
   }
 }
 

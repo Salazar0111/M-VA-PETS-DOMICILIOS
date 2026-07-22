@@ -65,9 +65,10 @@
     </div>
 
     <div id="vista-resumen">
-    <div class="kpis">
+    <div class="kpis" id="r-kpis">
       <div class="kpi"><div class="l"><span class="sq" style="background:var(--forest)"></span>Visitas del día</div><div class="n" id="k-visitas">—</div><div class="sub">Ventana 8:00 a.m. – 4:00 p.m.</div></div>
       <div class="kpi"><div class="l"><span class="sq" style="background:var(--ok)"></span>Completadas</div><div class="n" id="k-completadas">—</div><div class="sub" id="k-completadas-sub">—</div></div>
+      <div class="kpi"><div class="l"><span class="sq" style="background:var(--sage)"></span>Facturado hoy</div><div class="n" id="k-facturado">—</div><div class="sub">Suma de valores cobrados</div></div>
       <div class="kpi"><div class="l"><span class="sq" style="background:var(--camel)"></span>Km recorridos</div><div class="n" id="k-km">—</div><div class="sub" id="k-km-sub">—</div></div>
       <div class="kpi"><div class="l"><span class="sq" style="background:var(--terra)"></span>Promedio / visita</div><div class="n" id="k-prom">—</div><div class="sub">Tiempo efectivo en consulta</div></div>
     </div>
@@ -107,6 +108,11 @@
           <div class="bars" id="s-bars"></div>
         </div>
       </div>
+    </div>
+
+    <div class="card" style="margin-top:22px">
+      <div class="head"><h2>Observaciones del día</h2><span class="meta" id="obs-meta"></span></div>
+      <div id="obs-lista"></div>
     </div>
     </div>
 

@@ -26,6 +26,11 @@ app.get('/dashboard', (_, res) => res.sendFile(path.join(__dirname, 'public', 'd
 app.get('/app', (_, res) => res.redirect('/app/'));
 app.get('/app/', (_, res) => res.sendFile(path.join(__dirname, 'public', 'app', 'index.html')));
 
+// Panel de operación de MÜVA (datos en vivo). /dashboard sigue siendo la
+// maqueta estática que ya se compartió con el cliente.
+app.get('/panel', (_, res) => res.redirect('/panel/'));
+app.get('/panel/', (_, res) => res.sendFile(path.join(__dirname, 'public', 'panel', 'index.html')));
+
 // Recalcular la ruta de una fecha (YYYY-MM-DD). Solo admin: consume cuota de Google Maps.
 app.get('/rutas/calcular/:fecha', requiereSesion, requiereRol('admin'), async (req, res) => {
   try {

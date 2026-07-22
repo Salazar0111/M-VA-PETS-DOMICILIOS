@@ -321,8 +321,9 @@ function pintarCierre() {
     .filter(Boolean)
     .sort()
     .pop();
+  // hora() en es-CO ya termina en punto ("8:32 p. m."); no añadimos otro.
   $('c-libre').textContent = ultima
-    ? `Tu agenda quedó libre desde las ${hora(ultima)}.`
+    ? `Tu agenda quedó libre desde las ${hora(ultima)}`
     : 'Tu agenda quedó libre.';
 
   mostrar('v-cierre');

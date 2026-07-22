@@ -31,6 +31,8 @@ const MENSAJES = {
     'Nuestras consultas a domicilio tienen un valor base que varía según el tipo de servicio. Escríbenos para darte una cotización exacta o para agendar tu cita 🐾',
   NO_ENTENDIDO:
     'Disculpa, no entendí bien tu respuesta. ¿Puedes intentarlo de nuevo?',
+  YA_AGENDADA:
+    '¡Ya tienes una cita agendada con nosotros! Si necesitas agendar una nueva, escríbeme cuando quieras 🐾',
 };
 
 function obtenerSesion(id) {
@@ -44,6 +46,12 @@ function avanzarConversacion(id, mensajeUsuario) {
   const sesion = obtenerSesion(id);
   const { paso, datos } = sesion;
   let respuesta = null;
+  // Solo es true en el instante exacto en que SE ACABA de confirmar esta
+  // llamada — nunca se deriva del estado final de la sesión. Compararlo
+  // contra "sesion.paso === COMPLETADO" hacía que, una vez agendada la
+  // cita, CUALQUIER mensaje futuro de ese contacto (un "gracias", un
+  // saludo) creara otra cita duplicada con los datos viejos, para siempre.
+  let completadoAhora = false;
 
   switch (paso) {
     case PASOS.INICIO:
@@ -94,6 +102,7 @@ function avanzarConversacion(id, mensajeUsuario) {
       const respuestaLower = mensajeUsuario.toLowerCase().trim();
       if (respuestaLower.startsWith('s') || respuestaLower === 'si' || respuestaLower === 'sí') {
         sesion.paso = PASOS.COMPLETADO;
+        completadoAhora = true;
         respuesta =
           '✅ ¡Tu cita ha sido agendada! Un veterinario de MÜVA PETS se pondrá en contacto contigo para confirmarte la hora exacta. ¡Hasta pronto! 🐾';
       } else {
@@ -104,11 +113,21 @@ function avanzarConversacion(id, mensajeUsuario) {
       break;
     }
 
+    // Ya se le agendó una cita a este contacto y sigue escribiendo (un
+    // "gracias", un saludo). No hay que volver a preguntar nada ni crear
+    // otra cita: se le avisa y se deja la sesión lista para un agendamiento
+    // nuevo si de verdad lo pide más adelante.
+    case PASOS.COMPLETADO:
+      sesion.paso = PASOS.INICIO;
+      sesion.datos = {};
+      respuesta = MENSAJES.YA_AGENDADA;
+      break;
+
     default:
       respuesta = MENSAJES.NO_ENTENDIDO;
   }
 
-  return { respuesta, datos: sesion.datos, completado: sesion.paso === PASOS.COMPLETADO };
+  return { respuesta, datos: sesion.datos, completado: completadoAhora };
 }
 
 function iniciarAgendamiento(id) {

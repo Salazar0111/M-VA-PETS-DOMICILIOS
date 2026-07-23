@@ -39,6 +39,16 @@ router.post('/', async (req, res) => {
 
     const sesion = obtenerSesion(from);
 
+    // Una cita ya agendada no debe "gastarse" el próximo mensaje del
+    // cliente solo en resetear la sesión — lo reseteamos aquí en silencio
+    // y dejamos que este mismo mensaje se clasifique normalmente abajo.
+    // Si no hiciéramos esto, un cliente que escribe "quiero otra cita"
+    // después de terminar la primera tendría que escribirlo dos veces.
+    if (sesion.paso === PASOS.COMPLETADO) {
+      sesion.paso = PASOS.INICIO;
+      sesion.datos = {};
+    }
+
     // Si hay una sesión de agendamiento activa, continuar el flujo
     if (sesion.paso !== PASOS.INICIO) {
       const { respuesta, datos, completado } = avanzarConversacion(from, texto);

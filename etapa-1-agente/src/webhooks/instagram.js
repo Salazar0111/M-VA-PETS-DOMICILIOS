@@ -37,8 +37,15 @@ router.post('/', async (req, res) => {
 
     console.log(`[IG] Mensaje de ${senderId}: "${texto}"`);
 
-    const sesion = obtenerSesion(`ig_${senderId}`);
     const idSesion = `ig_${senderId}`;
+    const sesion = obtenerSesion(idSesion);
+
+    // Ver comentario equivalente en webhooks/whatsapp.js: evita que el
+    // cliente tenga que escribir dos veces para iniciar un nuevo agendamiento.
+    if (sesion.paso === PASOS.COMPLETADO) {
+      sesion.paso = PASOS.INICIO;
+      sesion.datos = {};
+    }
 
     if (sesion.paso !== PASOS.INICIO) {
       const { respuesta, datos, completado } = avanzarConversacion(idSesion, texto);

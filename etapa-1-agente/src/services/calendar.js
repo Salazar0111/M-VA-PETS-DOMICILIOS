@@ -10,6 +10,11 @@ oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN })
 
 const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
+// El nombre quedó heredado del diseño original. Hoy este evento va al
+// calendario de MÜVA (`resultadosmuva@gmail.com`), no al del veterinario:
+// él ve su jornada en la PWA /app/, con el briefing clínico completo.
+// Decisión del 2026-07-25 — por eso GOOGLE_CALENDAR_ID_VETERINARIO se deja
+// sin setear y cae en 'primary'.
 async function crearEventoVeterinario(datosCita) {
   const { inicio, fin, interpretado } = interpretarFechaHora(datosCita.fechaHora, datosCita.tipoConsulta);
   if (!interpretado) {
@@ -19,12 +24,26 @@ async function crearEventoVeterinario(datosCita) {
     );
   }
 
+  // El veterinario ve esto en su celular antes de salir: además del dato
+  // logístico, va el triaje (qué tan urgente y qué material alistar) para
+  // que no tenga que abrir la app para saber qué meter en el maletín.
+  const urgencia = datosCita.nivelUrgencia ? `[${datosCita.nivelUrgencia.toUpperCase()}] ` : '';
+  const lineas = [
+    `Tipo: ${datosCita.tipoServicio || datosCita.tipoConsulta}`,
+    datosCita.motivoConsulta ? `Motivo: ${datosCita.motivoConsulta}` : null,
+    datosCita.sintomas ? `Síntomas: ${datosCita.sintomas}` : null,
+    datosCita.edadAproximada ? `Edad: ${datosCita.edadAproximada}` : null,
+    `Dueño: ${datosCita.nombreDueno || '—'}`,
+    `Dirección: ${datosCita.direccion}`,
+    datosCita.muestrasSugeridas?.length
+      ? `\nAlistar:\n- ${datosCita.muestrasSugeridas.join('\n- ')}`
+      : null,
+    `\nSolicitado como: "${datosCita.fechaHora}"`,
+  ].filter(Boolean);
+
   const evento = {
-    summary: `Consulta veterinaria — ${datosCita.nombreMascota} (${datosCita.especie})`,
-    description:
-      `Tipo: ${datosCita.tipoConsulta}\n` +
-      `Dirección: ${datosCita.direccion}\n` +
-      `Solicitado: ${datosCita.fechaHora}`,
+    summary: `${urgencia}${datosCita.nombreMascota} (${datosCita.especie}) — ${datosCita.tipoServicio || datosCita.tipoConsulta}`,
+    description: lineas.join('\n'),
     location: datosCita.direccion,
     start: { dateTime: inicio.toISOString(), timeZone: 'America/Bogota' },
     end: { dateTime: fin.toISOString(), timeZone: 'America/Bogota' },
@@ -35,7 +54,7 @@ async function crearEventoVeterinario(datosCita) {
     requestBody: evento,
   });
 
-  return { eventoId: data.id, fechaHoraConfirmada: inicio };
+  return { eventoId: data.id, fechaHoraConfirmada: inicio, interpretado };
 }
 
 module.exports = { crearEventoVeterinario };

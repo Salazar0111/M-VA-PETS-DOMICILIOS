@@ -74,6 +74,7 @@ button{font-family:inherit;cursor:pointer;border:none}
 .mascota{display:block;font-family:var(--font-display);font-size:17px;font-weight:500;color:var(--forest);line-height:1.05}
 .dir{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hora{display:block;font-size:11.5px;color:var(--sage);font-weight:500;margin-top:5px}
+.urg-inline{color:#9a5a3e;font-weight:600}
 .chip{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;padding:5px 10px;border-radius:100px;white-space:nowrap}
 .chip.ahora{background:var(--terra);color:#fff}
 .chip.pend{background:rgba(187,154,127,.22);color:#836a4f}
@@ -96,6 +97,23 @@ button{font-family:inherit;cursor:pointer;border:none}
 .fila .v{font-size:13px;color:var(--forest);font-weight:500;text-align:right}
 .mapa-link{display:block;margin:14px 24px 0;text-align:center;font-size:12.5px;color:var(--sage);text-decoration:none;padding:12px;border:1px dashed rgba(118,131,106,.4);border-radius:13px}
 .oculto{display:none!important}
+
+/* ---------- Briefing clínico ---------- */
+.clinico{margin:16px 24px 0;background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 16px}
+.clinico-cab{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.clinico-tit{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--terra);font-weight:600}
+.urg{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;padding:5px 10px;border-radius:100px;white-space:nowrap}
+.urg.baja{background:rgba(118,131,106,.14);color:#566b47}
+.urg.media{background:rgba(187,154,127,.24);color:#7d6349}
+.urg.alta{background:rgba(190,124,96,.18);color:#9a5a3e}
+.urg.critica{background:#9a3b22;color:#fff}
+.clinico-bloque+.clinico-bloque{margin-top:13px;padding-top:13px;border-top:1px solid var(--line-2)}
+.clinico-k{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.clinico-txt{font-size:13.5px;line-height:1.5;color:var(--forest)}
+.clinico-lista{list-style:none;display:flex;flex-direction:column;gap:7px}
+.clinico-lista li{font-size:13px;line-height:1.45;color:var(--forest);padding-left:16px;position:relative}
+.clinico-lista li::before{content:'';position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--camel)}
+.clinico-pie{margin-top:13px;font-size:10.5px;line-height:1.4;color:var(--muted)}
 .obs-wrap{margin:18px 24px 0}
 .obs-label{display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .obs-req{font-size:8.5px;letter-spacing:.06em;background:rgba(190,124,96,.16);color:#9a5a3e;padding:2px 8px;border-radius:100px;text-transform:none}

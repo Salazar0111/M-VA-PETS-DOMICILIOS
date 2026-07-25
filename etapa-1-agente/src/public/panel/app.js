@@ -312,6 +312,8 @@ function pintarCitas({ citas }) {
   }
 
   const etiqueta = { completada: 'Completada', en_consulta: 'En consulta', programada: 'Programada' };
+  // 'baja' no se marca: sería ruido en la mayoría de filas.
+  const URGENCIA_PANEL = { media: 'Sin afán', alta: 'Prioritaria', critica: 'Crítica' };
   cuerpo.innerHTML = citas
     .map(
       (c) => `<tr>
@@ -322,7 +324,11 @@ function pintarCitas({ citas }) {
           <div class="sub-c">${c.telefonoContacto || 'Sin teléfono'}</div>
           ${c.telefonoContacto ? `<button class="btn-hist" type="button" data-telefono="${escapeAttr(c.telefonoContacto)}">Ver historial</button>` : ''}
         </td>
-        <td class="zone">${c.motivo || '—'}</td>
+        <td class="zone">
+          ${URGENCIA_PANEL[c.nivelUrgencia] ? `<span class="urg ${c.nivelUrgencia}">${URGENCIA_PANEL[c.nivelUrgencia]}</span>` : ''}
+          <div>${c.motivo || '—'}</div>
+          ${c.sintomas ? `<div class="sub-c" title="${escapeAttr(c.sintomas)}">${c.sintomas}</div>` : ''}
+        </td>
         <td>${hora(c.hora)}</td>
         <td><span class="st ${c.estado}"><span class="dot"></span>${etiqueta[c.estado]}</span>
           ${c.observaciones ? `<span class="nota" title="${escapeAttr(c.observaciones)}">📝</span>` : ''}

@@ -1,0 +1,331 @@
+<title>MÜVA PETS · Reglas de triaje para revisión clínica</title>
+<style>
+  /* Paleta y tipografía de la marca MÜVA (manual de marca del proyecto).
+     Sin fuentes externas: la CSP de la página las bloquearía y caeríamos
+     en un fallback silencioso. */
+  :root{
+    --paper:#faf7f2; --card:#ffffff; --ink:#2b3022; --forest:#303926;
+    --sage:#76836a; --terra:#be7c60; --camel:#bb9a7f; --cream:#e7dfd3;
+    --muted:#857f70; --line:rgba(48,57,38,.13); --line-soft:rgba(48,57,38,.07);
+    --critico:#9a3b22; --critico-tinte:rgba(154,59,34,.09);
+    --alta:#9a5a3e; --alta-tinte:rgba(190,124,96,.16);
+    --media:#7d6349; --media-tinte:rgba(187,154,127,.22);
+    --baja:#566b47; --baja-tinte:rgba(118,131,106,.15);
+    --display:Georgia,'Times New Roman',serif;
+    --ui:ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#171b13; --card:#1f2419; --ink:#e6e1d5; --forest:#dfe6d3;
+      --sage:#9aa78d; --muted:#9b9585; --line:rgba(231,223,211,.16); --line-soft:rgba(231,223,211,.09);
+      --critico:#e8846a; --critico-tinte:rgba(232,132,106,.14);
+      --alta:#dda184; --alta-tinte:rgba(221,161,132,.14);
+      --media:#cdb193; --media-tinte:rgba(205,177,147,.14);
+      --baja:#a3bb8e; --baja-tinte:rgba(163,187,142,.14);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#171b13; --card:#1f2419; --ink:#e6e1d5; --forest:#dfe6d3;
+    --sage:#9aa78d; --muted:#9b9585; --line:rgba(231,223,211,.16); --line-soft:rgba(231,223,211,.09);
+    --critico:#e8846a; --critico-tinte:rgba(232,132,106,.14);
+    --alta:#dda184; --alta-tinte:rgba(221,161,132,.14);
+    --media:#cdb193; --media-tinte:rgba(205,177,147,.14);
+    --baja:#a3bb8e; --baja-tinte:rgba(163,187,142,.14);
+  }
+  :root[data-theme="light"]{
+    --paper:#faf7f2; --card:#ffffff; --ink:#2b3022; --forest:#303926;
+    --sage:#76836a; --muted:#857f70; --line:rgba(48,57,38,.13); --line-soft:rgba(48,57,38,.07);
+    --critico:#9a3b22; --critico-tinte:rgba(154,59,34,.09);
+    --alta:#9a5a3e; --alta-tinte:rgba(190,124,96,.16);
+    --media:#7d6349; --media-tinte:rgba(187,154,127,.22);
+    --baja:#566b47; --baja-tinte:rgba(118,131,106,.15);
+  }
+
+  body{background:var(--paper);color:var(--ink);font-family:var(--ui);line-height:1.6;
+       -webkit-font-smoothing:antialiased}
+  .hoja{max-width:44rem;margin:0 auto;padding:clamp(1.75rem,5vw,3.5rem) clamp(1.1rem,4vw,2rem) 5rem;
+        display:flex;flex-direction:column;gap:2.5rem}
+
+  .marca{font-family:var(--display);font-size:1.6rem;color:var(--forest);letter-spacing:-.01em;line-height:1}
+  .eyebrow{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);font-weight:600}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(1.9rem,5.5vw,2.7rem);color:var(--forest);
+     line-height:1.12;letter-spacing:-.015em;text-wrap:balance;margin:.6rem 0 .5rem}
+  .fecha{font-size:.85rem;color:var(--muted)}
+  .intro{font-size:1.02rem}
+  .descargo{font-weight:600;color:var(--forest)}
+
+  .pedido{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--terra);
+          border-radius:.55rem;padding:1.1rem 1.25rem;font-size:.97rem}
+  .nota{font-size:.9rem;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:1.1rem}
+  .nota b{color:var(--ink)}
+
+  section{display:flex;flex-direction:column;gap:1.1rem}
+  .parte{border-top:2px solid var(--forest);padding-top:1.1rem}
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(1.35rem,4vw,1.75rem);color:var(--forest);
+     line-height:1.2;text-wrap:balance}
+  section > p{font-size:.97rem;margin:0}
+  .aviso{color:var(--critico);font-weight:600}
+
+  .caso{background:var(--card);border:1px solid var(--line);border-radius:.7rem;
+        padding:1.15rem 1.25rem;display:flex;flex-direction:column;gap:.7rem}
+  .caso.critico{border-left:4px solid var(--critico);background:var(--critico-tinte)}
+  .caso-cab{display:flex;align-items:baseline;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+  h3{font-family:var(--display);font-weight:400;font-size:1.18rem;color:var(--forest);line-height:1.25;
+     text-wrap:balance}
+  h4{font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:700;
+     margin-bottom:.45rem}
+
+  .pill{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+        padding:.28rem .6rem;border-radius:99px;white-space:nowrap}
+  .pill.alta{background:var(--alta-tinte);color:var(--alta)}
+  .pill.media{background:var(--media-tinte);color:var(--media)}
+  .pill.baja{background:var(--baja-tinte);color:var(--baja)}
+  .nivel-nota{font-size:.85rem;color:var(--muted);margin:-.4rem 0 0}
+
+  .disparador{font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);
+              font-weight:700;margin:0}
+  .frases{list-style:none;display:flex;flex-wrap:wrap;gap:.4rem;padding:0}
+  .frases li{font-size:.87rem;background:var(--paper);border:1px solid var(--line-soft);
+             border-radius:.35rem;padding:.24rem .55rem;color:var(--ink)}
+  .caso.critico .frases li{background:var(--card)}
+
+  .sub{border-top:1px solid var(--line-soft);padding-top:.85rem}
+  .puntos{padding-left:1.05rem;display:flex;flex-direction:column;gap:.4rem}
+  .puntos li{font-size:.92rem}
+  .puntos li::marker{color:var(--camel)}
+
+  .generales{display:flex;flex-direction:column;gap:.75rem;padding-left:1.05rem}
+  .generales li{font-size:.95rem}
+  .generales li::marker{color:var(--camel)}
+  .generales b{color:var(--forest)}
+
+  .pie{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:1.2rem}
+
+  @media print{
+    body{background:#fff}
+    .caso{break-inside:avoid;border:1px solid #ccc}
+    .hoja{padding:0;gap:1.5rem}
+  }
+</style>
+
+<div class="hoja">
+  <header>
+    <div class="marca">müva</div>
+    <p class="eyebrow" style="margin-top:.9rem">Revisión clínica</p>
+    <h1>Reglas de triaje del chat de agendamiento</h1>
+    <p class="fecha">Generado el 25 de julio de 2026 · MARKETEADOS para MÜVA PETS</p>
+  </header>
+
+  <section>
+    <p class="intro">Cuando una persona escribe por WhatsApp o Instagram contando qué le pasa a su mascota, el sistema lee ese texto y hace dos cosas: decide qué tan rápido hay que atender y arma la lista de qué debe alistar el veterinario antes de salir. También le dice al dueño qué puede preparar mientras tanto.</p>
+    <p class="descargo">Esto no es un diagnóstico y no reemplaza la valoración. Es preparación logística.</p>
+    <p class="pedido">Lo que necesitamos de ti: que marques lo que esté mal. Sobra algo, falta algo, un nivel de urgencia que no corresponde, una muestra que no se toma a domicilio, una recomendación al dueño que sea incorrecta. Cualquier corrección se aplica directo al sistema.</p>
+    <p class="nota"><b>Cómo leer las frases de ejemplo.</b> El sistema no busca la frase exacta, busca el fragmento. Un fragmento cortado como “ahogand” cubre “ahogando”, “ahogándose”, “se está ahogando”; “colaps” cubre “colapsó” y “colapsado”. Las barras son alternativas: “lengua morada/azul” significa que sirve cualquiera de las dos. No distingue mayúsculas ni tildes.</p>
+  </section>
+
+  <section class="parte">
+    <h2>Parte 1 · Casos que se mandan a urgencias, no a domicilio</h2>
+    <p>Si el mensaje contiene alguna de estas señales, el asistente no agenda una visita normal: le dice a la persona que lleve la mascota de inmediato a una clínica 24 horas, le explica por qué no da espera, y solo después ofrece coordinar el seguimiento a domicilio.</p>
+    <p class="aviso">Esta es la parte más delicada del sistema. Un caso que falte aquí es un caso que se va a quedar esperando una visita.</p>
+    
+      <article class="caso critico">
+        <h3>Dificultad respiratoria o mucosas alteradas</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>no puede respirar</li><li>dificultad para respirar</li><li>le cuesta respirar</li><li>se ahoga</li><li>ahogand</li><li>respira raro</li><li>respira rapido</li><li>agitado/a much</li><li>lengua morada/azul/violeta</li><li>encias moradas/azules/palidas/blancas</li><li>mucosas palidas</li><li>cianos</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Signos neurológicos (convulsión, colapso o alteración de la conciencia)</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>convulsion</li><li>convulsiona</li><li>ataque epilep</li><li>epilep</li><li>espasmos</li><li>temblando mucho</li><li>tembloroso</li><li>se desmay</li><li>desmayo</li><li>colaps</li><li>no responde</li><li>inconsciente</li><li>no reacciona</li><li>camina en circulo</li><li>perdio el equilibrio</li><li>cabeza torcida</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Trauma o sangrado activo</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>atropell</li><li>lo pisó</li><li>lo piso un carro</li><li>se cayo de</li><li>cayo del</li><li>caida de altura</li><li>le pego un carro</li><li>mordido por otro perro</li><li>pelea con otro perro</li><li>herida grande/abierta/profunda</li><li>sangra mucho</li><li>hemorragia</li><li>no para de sangrar</li><li>hueso afuera/expuesto</li><li>fractura</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Sospecha de intoxicación o reacción alérgica aguda</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>intoxic</li><li>envenen</li><li>comio veneno</li><li>raticida</li><li>rodenticida</li><li>se comio chocolate</li><li>xilitol</li><li>comio pastillas</li><li>se tomo</li><li>lamio cloro/desinfectante/anticongelante</li><li>mordio una serpiente</li><li>lo mordio una serpiente</li><li>picadura de serpiente/abeja/avispa</li><li>hinchada la cara</li><li>cara hinchada</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Posible obstrucción urinaria (en gatos machos es mortal en horas)</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>no puede orinar</li><li>no ha orinado</li><li>no orina</li><li>intentando orinar/hacer pipi y no</li><li>pujando para/por orinar</li><li>no hace pipi</li><li>no puede hacer pipi</li><li>orinar y no puede</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Abdomen distendido con arcadas improductivas (posible torsión gástrica)</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>abdomen hinchado/distendido/duro</li><li>barriga hinchada/dura/inflamada</li><li>estomago hinchado</li><li>arcadas sin vomitar</li><li>intenta vomitar y no puede</li><li>nausea sin vomit</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Parto complicado (distocia)</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>esta pariendo</li><li>en trabajo de parto</li><li>lleva horas pariendo</li><li>no puede parir</li><li>cachorro atorado</li><li>parto complicad</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Sospecha de golpe de calor</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>golpe de calor</li><li>se sobrecalento</li><li>quedo encerrado en el carro</li><li>jadea sin parar</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Urgencia oftalmológica o prolapso</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>ojo afuera/salido/se le salio</li><li>se le salio el ojo</li><li>prolapso</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Sangrado digestivo activo</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>vomit… con sangre</li><li>sangre en el vomito</li><li>heces negras</li><li>popo negro</li><li>diarrea con mucha sangre</li><li>sangre por el ano/la boca/la nariz</li></ul>
+      </article>
+  </section>
+
+  <section class="parte">
+    <h2>Parte 2 · Casos que sí se atienden a domicilio</h2>
+    <p>Para cada uno: qué tan rápido, qué alista el veterinario y qué prepara el dueño.</p>
+    
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Digestivo</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>vomit</li><li>guarcad</li><li>diarrea</li><li>deposicion blanda</li><li>heces blandas</li><li>popo blando</li><li>suelto del estomago</li><li>no hace bien del bano</li><li>parasitos</li><li>lombrices</li><li>gusanos en el popo</li><li>comio algo que no debia</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Coprológico directo + frotis (recoger muestra en sitio si el dueño no la tiene)</li><li>Prueba rápida de parvovirus/moquillo si es cachorro o no está vacunado</li><li>Hemograma y bioquímica básica (deshidratación y electrolitos)</li><li>Kit de fluidoterapia subcutánea + antiemético inyectable</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Si alcanza a recoger una muestra de popó fresca (de menos de 2 horas) en una bolsa o frasco limpio, sirve muchísimo</li><li>No le dé comida hasta que el veterinario lo revise; agua sí, en poquitos</li><li>Tenga a la mano el carné de vacunas y desparasitación</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Urinario</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>orina con sangre</li><li>sangre en la orina</li><li>orina mucho</li><li>toma mucha agua</li><li>se hace pipi en la casa</li><li>pipi con sangre</li><li>le arde al orinar</li><li>orina poquito</li><li>cistitis</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Uroanálisis + tirilla reactiva (cistocentesis si no hay muestra libre)</li><li>Frasco estéril para orina</li><li>Bioquímica renal (BUN, creatinina)</li><li>Ecógrafo portátil si está disponible (vejiga y riñones)</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Si logra recoger orina fresca en un frasco limpio y seco, guárdela refrigerada; si no, el veterinario la toma</li><li>No lo saque a orinar justo antes de la cita, para que llegue con vejiga</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Piel</h3>
+          <span class="pill media">Sin afán</span>
+        </div>
+        <p class="nivel-nota">Sin afán — en los próximos días</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>se rasca</li><li>rascando</li><li>comezon</li><li>picazon</li><li>alergia</li><li>caida de pelo</li><li>se le cae el pelo</li><li>pelado/a</li><li>caspa</li><li>granos</li><li>ronchas</li><li>costras</li><li>sarna</li><li>pulgas</li><li>garrapatas</li><li>hongos</li><li>piel roja</li><li>se lame mucho</li><li>se muerde las patas</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Raspado cutáneo profundo y superficial (láminas + aceite mineral)</li><li>Citología por impronta y cinta de acetato</li><li>Tricograma</li><li>Lámpara de Wood (descartar dermatofitos)</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>No lo bañe ni le aplique cremas, talcos o remedios caseros en las 48 horas antes de la visita: eso borra la muestra</li><li>Si le ha aplicado algún producto, tenga el empaque a la mano</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Oido</h3>
+          <span class="pill media">Sin afán</span>
+        </div>
+        <p class="nivel-nota">Sin afán — en los próximos días</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>oido</li><li>oreja</li><li>sacude la cabeza</li><li>se rasca la oreja</li><li>mal olor en/de la oreja/el oido</li><li>otitis</li><li>secrecion en el oido</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Citología ótica (hisopos + láminas)</li><li>Otoscopio con conos desechables</li><li>Solución de limpieza ótica</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>No le limpie los oídos antes de la visita: la muestra debe tomarse tal como está</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Ojos</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>ojo rojo/llorando/cerrado/nublado/opaco</li><li>lagrime</li><li>legañ</li><li>secrecion en el ojo</li><li>no abre el ojo</li><li>se golpeo el ojo</li><li>conjuntivitis</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Test de fluoresceína (descartar úlcera corneal)</li><li>Test de Schirmer</li><li>Colirio anestésico y solución salina estéril</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>No le aplique gotas ni colirios de otra mascota o de humanos antes de la revisión</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Respiratorio</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>tos</li><li>tosiendo</li><li>estornuda</li><li>mocos</li><li>gripa</li><li>moquillo</li><li>ronquera</li><li>silbid</li><li>traqueobronq</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Hemograma completo</li><li>Oxímetro de pulso y fonendo</li><li>Prueba rápida de moquillo si es cachorro o no está vacunado</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Anote hace cuántos días empezó la tos y si ha estado con otros perros o gatos</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Sistemico</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>decaid</li><li>triste</li><li>no come</li><li>no quiere comer</li><li>sin apetito</li><li>no se levanta</li><li>fiebre</li><li>caliente</li><li>adelgaz</li><li>perdio peso</li><li>debil</li><li>apatico</li><li>duerme todo el dia</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Hemograma completo + bioquímica (renal y hepática)</li><li>Prueba de hemoparásitos (ehrlichia / anaplasma / dirofilaria)</li><li>Tubos con EDTA y tubos secos, termómetro</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Si puede, no le dé comida las 8 horas previas (agua sí): permite tomar los exámenes de sangre en ayuno el mismo día</li><li>Tenga a la mano el carné de vacunas</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Locomotor</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>cojea</li><li>cojeando</li><li>no apoya</li><li>no camina bien</li><li>se le doblan las patas</li><li>dolor en la pata</li><li>se lastimo la pata</li><li>cadera</li><li>columna</li><li>arrastra las patas</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Examen ortopédico y neurológico completo</li><li>Analgesia inyectable</li><li>ADVERTENCIA: no hay radiografía a domicilio — si se sospecha fractura o hernia discal, hay que remitir a clínica</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Limite el movimiento: nada de escaleras, saltos ni paseos hasta la valoración</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Geriatrico</h3>
+          <span class="pill baja">Rutina</span>
+        </div>
+        <p class="nivel-nota">Rutina — se agenda con calma</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>viejit</li><li>geriatric</li><li>adulto mayor</li><li>tiene 10/-/9/2/-/90/-/9 anos</li><li>chequeo general</li><li>examen de sangre</li><li>perfil</li><li>control de rutina</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Perfil geriátrico: hemograma + bioquímica renal/hepática</li><li>Presión arterial</li><li>Tubos EDTA y secos</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Ayuno de 8 a 12 horas antes de la cita (agua sí), para el perfil de sangre</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Vacunacion</h3>
+          <span class="pill baja">Rutina</span>
+        </div>
+        <p class="nivel-nota">Rutina — se agenda con calma</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>vacun</li><li>refuerzo</li><li>rabia</li><li>polivalente</li><li>quintuple</li><li>sextuple</li><li>triple felina</li><li>carne de vacunas</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Biológicos según carné (verificar refuerzo pendiente antes de salir)</li><li>Carné de vacunación o uno nuevo</li><li>Nevera portátil con gel refrigerante (cadena de frío)</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Tenga el carné de vacunas a la mano</li><li>La mascota debe estar sana y desparasitada; si tiene síntomas, avísenos y lo revisamos primero</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Desparasitacion</h3>
+          <span class="pill baja">Rutina</span>
+        </div>
+        <p class="nivel-nota">Rutina — se agenda con calma</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>desparasit</li><li>antipulgas</li><li>pipeta</li><li>garrapaticida</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Antiparasitario interno y externo según peso</li><li>Báscula portátil</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Tenga a la mano el peso aproximado y la fecha de la última desparasitación</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Eutanasia</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>eutanasia</li><li>dormirlo</li><li>sacrificar</li><li>despedida</li><li>ya no tiene calidad de vida</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Protocolo de eutanasia humanitaria y consentimiento informado</li><li>Coordinar con el equipo antes de confirmar: requiere valoración previa</li></ul></div>
+        
+      </article>
+  </section>
+
+  <section class="parte">
+    <h2>Parte 3 · Reglas generales</h2>
+    <ul class="generales"><li>Si la persona dice que es <b>urgente</b> (“urgente”, “emergencia”, “se está muriendo”, “grave”), la urgencia <b>sube</b> a prioritaria. Nunca baja por eso.</li><li>Si el mensaje toca varios cuadros a la vez (por ejemplo vómito y decaimiento), se aplica <b>la urgencia más alta</b> y se suman las muestras de ambos.</li><li>Una señal de la Parte 1 manda a urgencias <b>sin importar</b> lo demás que diga el mensaje.</li><li>Las visitas se agendan solo entre <b>8:00 a.m. y 4:00 p.m.</b> Fuera de esa franja el sistema no deja agendar y propone otra hora.</li><li>El asistente <b>no diagnostica, no receta y no sugiere dosis ni remedios caseros</b>, ni siquiera si se lo piden. Si preguntan por medicamentos, responde que no le den nada hasta que lo vea el veterinario.</li></ul>
+  </section>
+
+  <p class="pie">
+    10 casos de urgencia · 12 cuadros de domicilio.
+    Este documento se genera automáticamente desde las reglas del sistema, así que siempre refleja
+    lo que el chat está haciendo hoy.
+  </p>
+</div>

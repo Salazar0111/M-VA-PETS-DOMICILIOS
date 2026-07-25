@@ -58,6 +58,31 @@ async function buscarOCrearMascota(clienteId, nombre, especie) {
   return { mascota: data, esNueva: true };
 }
 
+// Lo que el agente necesita saber ANTES de escribir el primer mensaje: si a
+// esta persona ya la conocemos y con qué mascotas. Es la diferencia entre
+// "¿cuál es tu nombre?" y "¡Hola de nuevo! ¿Cómo sigue Kleo?".
+// Nunca lanza por "no existe": devolver null es la respuesta normal para
+// alguien que escribe por primera vez.
+async function obtenerContextoCliente(canal, identificador) {
+  const { data: cliente, error } = await supabase
+    .from('clientes')
+    .select('id, nombre, telefono')
+    .eq('canal', canal)
+    .eq('identificador', identificador)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!cliente) return null;
+
+  const { data: mascotas, error: errMascotas } = await supabase
+    .from('mascotas')
+    .select('nombre, especie')
+    .eq('cliente_id', cliente.id);
+
+  if (errMascotas) throw errMascotas;
+  return { ...cliente, mascotas: mascotas || [] };
+}
+
 async function crearCita(datos) {
   // El teléfono solo lo conocemos con certeza cuando el canal es WhatsApp:
   // ahí el identificador de contacto YA ES el número. Por Instagram no
@@ -81,6 +106,14 @@ async function crearCita(datos) {
       direccion: datos.direccion,
       tipo_consulta: datos.tipoConsulta,
       fecha_hora_solicitada: datos.fechaHora,
+      // Triaje: lo que el veterinario necesita saber antes de salir.
+      tipo_servicio: datos.tipoServicio || null,
+      motivo_consulta: datos.motivoConsulta || null,
+      sintomas: datos.sintomas || null,
+      edad_aproximada: datos.edadAproximada || null,
+      nivel_urgencia: datos.nivelUrgencia || null,
+      muestras_sugeridas: datos.muestrasSugeridas || null,
+      preparacion_cliente: datos.preparacionCliente || null,
     })
     .select()
     .single();
@@ -214,6 +247,7 @@ async function registrarCheckOut(citaId, { observaciones, metodoPago, valorServi
 
 module.exports = {
   METODOS_PAGO,
+  obtenerContextoCliente,
   crearCita,
   actualizarEventoVeterinario,
   obtenerCitasDelDia,

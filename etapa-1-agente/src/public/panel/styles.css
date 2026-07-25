@@ -91,7 +91,12 @@ tbody tr:hover{background:rgba(118,131,106,.05)}
 .ord{width:24px;height:24px;border-radius:50%;background:var(--cream-2);color:var(--forest);font-family:var(--font-display);font-weight:600;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
 .pet{font-family:var(--font-display);font-weight:500;font-size:15px;color:var(--forest)}
 .sub-c{font-size:11px;color:var(--muted);margin-top:1px}
-.zone{color:var(--muted);font-size:12px}
+.zone{color:var(--muted);font-size:12px;max-width:280px}
+.zone .sub-c{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.urg{display:inline-block;font-size:9px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;padding:3px 8px;border-radius:100px;margin-bottom:4px}
+.urg.media{background:rgba(187,154,127,.24);color:#7d6349}
+.urg.alta{background:rgba(190,124,96,.18);color:#9a5a3e}
+.urg.critica{background:#9a3b22;color:#fff}
 .st{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;padding:4px 10px;border-radius:100px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .st .dot{width:6px;height:6px;border-radius:50%}
 .st.completada{background:rgba(111,133,96,.15);color:#566b47}

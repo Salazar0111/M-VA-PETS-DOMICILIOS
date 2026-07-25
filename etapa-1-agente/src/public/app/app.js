@@ -192,7 +192,11 @@ function pintarRuta() {
       <span class="info">
         <span class="mascota">${c.nombre_mascota || 'Sin nombre'}</span>
         <span class="dir">${c.direccion || ''}</span>
-        <span class="hora">${hora(c.fecha_hora_confirmada)} · ${c.especie || ''}</span>
+        <span class="hora">${hora(c.fecha_hora_confirmada)} · ${c.especie || ''}${
+      ['alta', 'critica'].includes(c.nivel_urgencia) && !done
+        ? ` · <b class="urg-inline">${ETIQUETA_URGENCIA[c.nivel_urgencia]}</b>`
+        : ''
+    }</span>
       </span>
       ${chip}`;
     btn.addEventListener('click', () => abrirDetalle(c.id));
@@ -224,14 +228,53 @@ function abrirDetalle(id) {
   $('d-mascota').textContent = c.nombre_mascota || 'Sin nombre';
   $('d-sub').textContent = [c.especie, c.tipo_consulta].filter(Boolean).join(' · ');
   $('d-dir').textContent = c.direccion || '—';
-  $('d-motivo').textContent = c.tipo_consulta || '—';
+  $('d-motivo').textContent = c.motivo_consulta || c.tipo_consulta || '—';
   $('d-hora').textContent = hora(c.fecha_hora_confirmada);
+  pintarClinico(c);
   $('d-mapa').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     (c.direccion || '') + ', Bogotá'
   )}`;
 
   pintarAccion();
   mostrar('v-detalle');
+}
+
+const ETIQUETA_URGENCIA = {
+  baja: 'Rutina',
+  media: 'Sin afán',
+  alta: 'Prioritaria',
+  critica: 'Crítica · derivada',
+};
+
+// Lo que el agente recogió en el chat. Las citas anteriores al triaje no
+// traen nada de esto, así que el bloque entero se oculta en vez de
+// mostrarse vacío.
+function pintarClinico(c) {
+  const caja = $('d-clinico');
+  const sintomas = c.sintomas || c.motivo_consulta;
+  const muestras = Array.isArray(c.muestras_sugeridas) ? c.muestras_sugeridas : [];
+
+  if (!c.nivel_urgencia && !sintomas && !muestras.length) {
+    caja.classList.add('oculto');
+    return;
+  }
+  caja.classList.remove('oculto');
+
+  const urg = $('d-urgencia');
+  urg.textContent = ETIQUETA_URGENCIA[c.nivel_urgencia] || '';
+  urg.className = `urg ${c.nivel_urgencia || ''}`;
+  urg.style.display = c.nivel_urgencia ? '' : 'none';
+
+  $('d-sintomas-wrap').classList.toggle('oculto', !sintomas);
+  $('d-sintomas').textContent = sintomas || '';
+
+  $('d-muestras-wrap').classList.toggle('oculto', !muestras.length);
+  $('d-muestras').innerHTML = '';
+  muestras.forEach((m) => {
+    const li = document.createElement('li');
+    li.textContent = m;
+    $('d-muestras').appendChild(li);
+  });
 }
 
 function pintarAccion() {

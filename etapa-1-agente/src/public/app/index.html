@@ -75,6 +75,25 @@
   </div>
   <a class="mapa-link" id="d-mapa" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>
 
+  <!-- Briefing clínico: lo que el agente recogió en el chat y lo que hay
+       que alistar. Se oculta completo si la cita no trae nada de esto
+       (citas viejas, anteriores al triaje). -->
+  <div class="clinico oculto" id="d-clinico">
+    <div class="clinico-cab">
+      <span class="clinico-tit">Antes de entrar</span>
+      <span class="urg" id="d-urgencia"></span>
+    </div>
+    <div class="clinico-bloque oculto" id="d-sintomas-wrap">
+      <span class="clinico-k">Lo que reportó el dueño</span>
+      <p class="clinico-txt" id="d-sintomas"></p>
+    </div>
+    <div class="clinico-bloque oculto" id="d-muestras-wrap">
+      <span class="clinico-k">Alistar</span>
+      <ul class="clinico-lista" id="d-muestras"></ul>
+    </div>
+    <p class="clinico-pie">Sugerencia automática según los síntomas del chat. No es un diagnóstico.</p>
+  </div>
+
   <div class="obs-wrap oculto" id="d-obs-wrap">
     <label for="d-obs" class="obs-label">Observaciones de la visita <span class="obs-req">obligatorio</span></label>
     <textarea id="d-obs" class="obs-textarea" rows="4" placeholder="Motivo consultado, hallazgos, tratamiento indicado…"></textarea>

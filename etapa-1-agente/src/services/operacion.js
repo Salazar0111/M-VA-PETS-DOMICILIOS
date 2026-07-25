@@ -145,7 +145,12 @@ async function resumenDelDia(fechaISO) {
       mascota: c.nombre_mascota,
       especie: c.especie,
       direccion: c.direccion,
-      motivo: c.tipo_consulta,
+      // El motivo en palabras del cliente es más útil que la etiqueta del
+      // tipo de servicio; se cae a tipo_consulta para las citas viejas.
+      motivo: c.motivo_consulta || c.tipo_consulta,
+      tipoServicio: c.tipo_servicio || c.tipo_consulta,
+      sintomas: c.sintomas || null,
+      nivelUrgencia: c.nivel_urgencia || null,
       hora: c.fecha_hora_confirmada,
       canal: c.canal,
       estado: c.check_out_at ? 'completada' : c.check_in_at ? 'en_consulta' : 'programada',

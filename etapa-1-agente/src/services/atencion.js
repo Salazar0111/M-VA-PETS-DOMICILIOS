@@ -50,6 +50,21 @@ const horaLegible = (fecha) =>
 
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Minutos transcurridos del día en Bogotá. Comparar horas enteras deja
+// fuera los bordes (las 4:00 p.m. exactas) y los minutos (4:30 p.m.).
+function minutosDelDiaBogota(fecha) {
+  const [h, m] = new Date(fecha)
+    .toLocaleTimeString('en-GB', { timeZone: 'America/Bogota', hour12: false, hour: '2-digit', minute: '2-digit' })
+    .split(':')
+    .map(Number);
+  return h * 60 + m;
+}
+
+// ¿Todavía se puede agendar algo para hoy? El agente no debe deducirlo por
+// su cuenta: en la prueba en vivo ofreció "hoy a las 3pm" siendo las 7:40
+// de la noche, y luego se disculpó tres veces seguidas.
+const quedaEspacioHoy = () => minutosDelDiaBogota(new Date()) < HORA_CIERRE * 60;
+
 // ---------------------------------------------------------------------------
 // Contexto volátil: todo lo que cambia entre un mensaje y otro. Va aparte
 // del prompt estable para no romper la caché de la API.
@@ -57,6 +72,28 @@ const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function armarContexto({ canal, cliente, alerta }) {
   const partes = [`Ahora mismo en Bogotá es ${ahoraBogota()}.`, `Canal: ${canal}.`];
+
+  // Calculado acá, no deducido por el modelo. En la prueba en vivo ofreció
+  // "hoy a las 4pm" y después "hoy a las 3pm" siendo las 7:40 p.m., y
+  // terminó disculpándose tres veces seguidas con el cliente.
+  const ahora = minutosDelDiaBogota(new Date());
+  if (ahora < HORA_APERTURA * 60) {
+    partes.push(`HOY todavía no abre: la jornada va de 8:00 a.m. a 4:00 p.m. El primer espacio de hoy son las 8:00 a.m.`);
+  } else if (ahora <= HORA_CIERRE * 60) {
+    const proxima = Math.min(Math.ceil((ahora + 30) / 30) * 30, HORA_CIERRE * 60);
+    const hh = Math.floor(proxima / 60);
+    const mm = String(proxima % 60).padStart(2, '0');
+    const h12 = hh > 12 ? hh - 12 : hh;
+    partes.push(
+      `HOY todavía se puede agendar. El primer espacio realista de hoy es a las ${h12}:${mm} ${hh >= 12 ? 'p.m.' : 'a.m.'}, ` +
+        `y el último son las 4:00 p.m. NO ofrezcas horas de hoy anteriores a esa: ya pasaron.`
+    );
+  } else {
+    partes.push(
+      `HOY YA CERRÓ (la jornada termina a las 4:00 p.m.). No ofrezcas ninguna hora de hoy, ni siquiera "más tarde". ` +
+        `Lo más pronto es MAÑANA entre 8:00 a.m. y 4:00 p.m. Si es una emergencia, aplica el protocolo de urgencias.`
+    );
+  }
 
   if (cliente) {
     partes.push(
@@ -119,27 +156,48 @@ async function agendarCita(canal, contactoId, entrada) {
   // Se valida ANTES de tocar Google Calendar y Supabase: si el horario no
   // sirve, no puede quedar un evento fantasma en la agenda del veterinario.
   const { inicio } = interpretarFechaHora(datos.fechaHora, datos.tipoConsulta);
-  const hora = Number(
-    inicio.toLocaleString('en-US', { timeZone: 'America/Bogota', hour: '2-digit', hour12: false })
-  );
 
-  // El contrato fija la ventana de atención de 8 a.m. a 4 p.m.
-  if (hora < HORA_APERTURA || hora >= HORA_CIERRE) {
+  // Las 4:00 p.m. SÍ son agendables: son el último espacio del día, no el
+  // primero que sobra. Comparar solo la hora entera (`hora >= 16`) rechazaba
+  // exactamente las 4pm, que es la hora que más pide la gente al final de la
+  // tarde — y el agente ya le había dicho al cliente que sí se podía.
+  const minutos = minutosDelDiaBogota(inicio);
+  if (minutos < HORA_APERTURA * 60 || minutos > HORA_CIERRE * 60) {
     return {
       ok: false,
-      error: `La hora acordada ("${entrada.fecha_hora_texto}") queda fuera de la franja de atención, que es de 8:00 a.m. a 4:00 p.m. No se agendó nada. Propónle otra hora dentro de ese horario y vuelve a intentarlo.`,
+      error: `La hora acordada ("${entrada.fecha_hora_texto}") queda fuera de la franja de atención: se atiende de 8:00 a.m. a 4:00 p.m., y las 4:00 p.m. son el último espacio. No se agendó nada. Propónle otra hora dentro de ese horario.`,
     };
   }
   if (inicio < new Date()) {
     return {
       ok: false,
-      error: `La fecha y hora acordadas ("${entrada.fecha_hora_texto}") ya pasaron. No se agendó nada. Confirma con el cliente qué día quiere realmente.`,
+      error:
+        `Esa fecha y hora ("${entrada.fecha_hora_texto}") ya pasaron. No se agendó nada. ` +
+        `${quedaEspacioHoy() ? 'Hoy todavía se puede: ofrécele un horario de aquí en adelante.' : 'Hoy ya se cerró la jornada: ofrécele mañana entre 8:00 a.m. y 4:00 p.m.'}`,
     };
   }
 
-  const { eventoId, fechaHoraConfirmada, interpretado } = await crearEventoVeterinario(datos);
-  const cita = await crearCita(datos);
-  await actualizarEventoVeterinario(cita.id, eventoId, fechaHoraConfirmada);
+  // A partir de aquí sí se toca el mundo exterior. Si algo falla, hay que
+  // saber EN QUÉ PASO fue: antes el error llegaba pelado y era imposible
+  // distinguir un problema de Google Calendar de uno de la base de datos.
+  let paso = 'Google Calendar';
+  let cita;
+  let eventoId, fechaHoraConfirmada, interpretado;
+  try {
+    ({ eventoId, fechaHoraConfirmada, interpretado } = await crearEventoVeterinario(datos));
+    paso = 'guardar la cita en Supabase';
+    cita = await crearCita(datos);
+    paso = 'enlazar el evento con la cita';
+    await actualizarEventoVeterinario(cita.id, eventoId, fechaHoraConfirmada);
+  } catch (err) {
+    // La cita se pierde si nadie la ve: queda en los logs como JSON para
+    // poder recuperarla a mano y llamar al cliente.
+    console.error(`[Atención] FALLÓ al ${paso}: ${err.message}`);
+    console.error('[Atención] Cita NO guardada. Datos para recuperarla:', JSON.stringify(datos));
+    if (err.stack) console.error(err.stack);
+    err.pasoQueFallo = paso;
+    throw err;
+  }
 
   console.log(
     `[Atención] Cita ${cita.id} agendada (${canal}) — urgencia ${evaluacion.nivel} — ${horaLegible(fechaHoraConfirmada)}`
@@ -273,4 +331,4 @@ async function procesar(id) {
   }
 }
 
-module.exports = { recibirMensaje, debeReordenar };
+module.exports = { recibirMensaje, debeReordenar, minutosDelDiaBogota };

@@ -128,11 +128,21 @@ async function responder({ id, texto, contexto, ejecutarHerramienta }) {
           resultado = await ejecutarHerramienta(llamada.name, llamada.input);
           herramientaUsada = { nombre: llamada.name, entrada: llamada.input, resultado };
         } catch (err) {
-          console.error(`[Agente] Falló la herramienta ${llamada.name}:`, err.message);
+          console.error(
+            `[Agente] Falló la herramienta ${llamada.name}${err.pasoQueFallo ? ` al ${err.pasoQueFallo}` : ''}:`,
+            err.message
+          );
           resultado = {
             ok: false,
+            // Redactado con dureza porque el modelo, ante un error genérico,
+            // tiende a tranquilizar al cliente inventando ("ya quedó la
+            // info", "ya tengo tus datos guardados"). En la prueba en vivo
+            // dijo exactamente eso, y era falso: no se guardó nada.
             error:
-              'No se pudo registrar la cita por una falla técnica. Dile al cliente que hubo un problema al guardarla y que el equipo lo contacta en unos minutos para confirmarla. No inventes que quedó agendada.',
+              'NO se pudo registrar la cita y NO quedó guardada en ninguna parte. ' +
+              'Dile al cliente, sin rodeos, que no pudiste dejar la cita registrada en este momento y que el equipo de MÜVA lo contacta enseguida para confirmarla. ' +
+              'PROHIBIDO decirle que sus datos quedaron guardados, que ya tienes la información, que la cita quedó anotada o cualquier cosa parecida: sería mentirle. ' +
+              'No vuelvas a intentar la herramienta con los mismos datos aunque el cliente insista; solo repite que el equipo lo contacta.',
           };
         }
         resultados.push({

@@ -1,0 +1,315 @@
+<title>MÜVA PETS · Manual de uso</title>
+<style>
+  /* Misma familia visual que la presentación de entrega y el documento de
+     triaje. Paleta del manual de marca de MÜVA. Sin fuentes externas. */
+  :root{
+    --paper:#faf7f2; --card:#ffffff; --ink:#2b3022; --forest:#303926;
+    --sage:#76836a; --terra:#be7c60; --camel:#bb9a7f;
+    --muted:#857f70; --line:rgba(48,57,38,.13); --line-soft:rgba(48,57,38,.07);
+    --alerta:#9a3b22; --alerta-tinte:rgba(154,59,34,.09);
+    --aviso:#7d6349; --aviso-tinte:rgba(187,154,127,.2);
+    --display:Georgia,'Times New Roman',serif;
+    --ui:ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#171b13; --card:#1f2419; --ink:#e6e1d5; --forest:#dfe6d3;
+      --sage:#9aa78d; --muted:#9b9585; --line:rgba(231,223,211,.16); --line-soft:rgba(231,223,211,.09);
+      --alerta:#e8846a; --alerta-tinte:rgba(232,132,106,.13);
+      --aviso:#cdb193; --aviso-tinte:rgba(205,177,147,.13);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#171b13; --card:#1f2419; --ink:#e6e1d5; --forest:#dfe6d3;
+    --sage:#9aa78d; --muted:#9b9585; --line:rgba(231,223,211,.16); --line-soft:rgba(231,223,211,.09);
+    --alerta:#e8846a; --alerta-tinte:rgba(232,132,106,.13);
+    --aviso:#cdb193; --aviso-tinte:rgba(205,177,147,.13);
+  }
+
+  body{background:var(--paper);color:var(--ink);font-family:var(--ui);line-height:1.62;
+       -webkit-font-smoothing:antialiased}
+  .hoja{max-width:46rem;margin:0 auto;padding:clamp(2rem,6vw,3.5rem) clamp(1.1rem,4vw,2rem) 5rem;
+        display:flex;flex-direction:column;gap:3rem}
+
+  .marca{font-family:var(--display);font-size:1.7rem;color:var(--forest);line-height:1}
+  .eyebrow{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);font-weight:600}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(2rem,6vw,2.9rem);color:var(--forest);
+     line-height:1.1;letter-spacing:-.02em;text-wrap:balance;margin:.7rem 0 .6rem}
+  .bajada{font-size:1.03rem;max-width:37rem}
+  .meta-doc{font-size:.85rem;color:var(--muted);margin-top:1.3rem;
+            border-top:1px solid var(--line-soft);padding-top:1rem}
+
+  nav.indice{background:var(--card);border:1px solid var(--line);border-radius:.7rem;padding:1.2rem 1.35rem}
+  nav.indice h2{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+                font-weight:700;font-family:var(--ui);margin-bottom:.75rem}
+  nav.indice ol{padding-left:1.15rem;display:flex;flex-direction:column;gap:.4rem;font-size:.96rem}
+  nav.indice li::marker{color:var(--camel)}
+  nav.indice a{color:var(--forest);text-decoration:none;border-bottom:1px solid var(--line)}
+  nav.indice a:hover{border-bottom-color:var(--terra)}
+
+  section{display:flex;flex-direction:column;gap:1.05rem;scroll-margin-top:1rem}
+  .parte{border-top:2px solid var(--forest);padding-top:1.1rem}
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(1.4rem,4vw,1.8rem);color:var(--forest);
+     line-height:1.2;text-wrap:balance}
+  h3{font-family:var(--display);font-weight:400;font-size:1.2rem;color:var(--forest);line-height:1.25;
+     margin-top:.6rem}
+  h4{font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  section > p, .bloque > p{margin:0;font-size:.98rem}
+
+  .bloque{background:var(--card);border:1px solid var(--line);border-radius:.7rem;padding:1.15rem 1.3rem;
+          display:flex;flex-direction:column;gap:.65rem}
+
+  ol.pasos{padding-left:1.2rem;display:flex;flex-direction:column;gap:.6rem;font-size:.97rem}
+  ol.pasos li::marker{color:var(--terra);font-weight:700}
+  ul.limpia{padding-left:1.05rem;display:flex;flex-direction:column;gap:.5rem;font-size:.97rem}
+  ul.limpia li::marker{color:var(--camel)}
+  b{color:var(--forest)}
+
+  .dl{display:grid;grid-template-columns:auto 1fr;gap:.5rem 1.1rem;font-size:.95rem;align-items:baseline}
+  .dl dt{font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:700;
+         white-space:nowrap}
+  .dl dd{margin:0}
+  code{font-family:var(--mono);font-size:.88em;background:var(--paper);border:1px solid var(--line-soft);
+       border-radius:.3rem;padding:.1rem .35rem;word-break:break-all}
+  .bloque code{background:var(--paper)}
+
+  .nota{border-left:3px solid var(--camel);background:var(--aviso-tinte);border-radius:.4rem;
+        padding:.9rem 1.1rem;font-size:.94rem}
+  .alerta{border-left:3px solid var(--alerta);background:var(--alerta-tinte);border-radius:.4rem;
+          padding:1rem 1.15rem;font-size:.95rem}
+  .alerta b{color:var(--alerta)}
+
+  .duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.85rem}
+  .mini{background:var(--card);border:1px solid var(--line);border-radius:.6rem;padding:1rem 1.1rem}
+  .mini h4{margin-bottom:.4rem}
+  .mini p{font-size:.92rem;margin:0}
+
+  .si-no{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.85rem}
+  .si-no > div{border:1px solid var(--line);border-radius:.6rem;padding:1.05rem 1.15rem;background:var(--card)}
+  .si-no ul{padding-left:1.05rem;display:flex;flex-direction:column;gap:.42rem;font-size:.94rem;margin-top:.5rem}
+
+  .tabla-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:.7rem;background:var(--card)}
+  table{border-collapse:collapse;width:100%;font-size:.93rem;min-width:30rem}
+  th,td{text-align:left;padding:.72rem .9rem;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  tr:last-child td{border-bottom:none}
+
+  .pie{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:1.2rem}
+
+  @media print{
+    body{background:#fff}
+    .bloque,.mini,.tabla-wrap,.alerta{break-inside:avoid}
+    nav.indice{display:none}
+    .hoja{padding:0;gap:1.8rem}
+  }
+</style>
+
+<div class="hoja">
+  <header>
+    <div class="marca">müva</div>
+    <p class="eyebrow" style="margin-top:1rem">Manual de uso</p>
+    <h1>Cómo operar la plataforma día a día</h1>
+    <p class="bajada">Tres herramientas, tres usuarios. Este documento explica cómo entra cada quien, qué hace cada pantalla y qué hacer cuando algo no sale como se espera.</p>
+    <p class="meta-doc">MARKETEADOS para RCS CAPITAL PARTNERS S.A.S. · Contrato MKT-CONT-2026-001 · Julio de 2026</p>
+  </header>
+
+  <nav class="indice">
+    <h2>Contenido</h2>
+    <ol>
+      <li><a href="#accesos">Accesos y roles</a></li>
+      <li><a href="#panel">Panel de operación de MÜVA</a></li>
+      <li><a href="#app">App del veterinario</a></li>
+      <li><a href="#asistente">Asistente de WhatsApp</a></li>
+      <li><a href="#datos">Datos y privacidad</a></li>
+      <li><a href="#soporte">Soporte y mantenimiento</a></li>
+    </ol>
+  </nav>
+
+  <!-- ================= 1 ================= -->
+  <section class="parte" id="accesos">
+    <h2>1 · Accesos y roles</h2>
+    <p>Cada persona entra con su propio correo y contraseña. El sistema tiene dos roles y cada uno solo ve lo que le corresponde.</p>
+
+    <div class="duo">
+      <div class="mini">
+        <h4>Rol administrador</h4>
+        <p>Es MÜVA. Accede al panel de operación y a toda la información de citas, historial e informes.</p>
+      </div>
+      <div class="mini">
+        <h4>Rol veterinario</h4>
+        <p>Accede únicamente a su app de jornada: la ruta del día y sus visitas. No ve informes ni facturación global.</p>
+      </div>
+    </div>
+
+    <div class="bloque">
+      <dl class="dl">
+        <dt>Panel MÜVA</dt><dd><code>https://m-va-pets-domicilios-production.up.railway.app/panel/</code></dd>
+        <dt>App veterinario</dt><dd><code>https://m-va-pets-domicilios-production.up.railway.app/app/</code></dd>
+      </dl>
+    </div>
+
+    <p class="nota">Para crear un usuario nuevo (por ejemplo, un segundo veterinario) escríbenos: se crea la cuenta y se le asigna el rol. No es algo que se configure desde el panel.</p>
+  </section>
+
+  <!-- ================= 2 ================= -->
+  <section class="parte" id="panel">
+    <h2>2 · Panel de operación de MÜVA</h2>
+    <p>Es la vista de control. Se abre desde un computador y responde tres preguntas: qué está pasando hoy, cómo va el negocio y cuándo hay espacio para vender otra visita.</p>
+
+    <h3>La barra superior</h3>
+    <ul class="limpia">
+      <li><b>Selector de fecha.</b> Todo el panel se mueve al día que elijas. Sirve para revisar días pasados o ver lo que ya está agendado para adelante.</li>
+      <li><b>Estado del veterinario.</b> Indica si está en consulta, en desplazamiento o si ya terminó la jornada.</li>
+      <li><b>Próxima disponibilidad.</b> La hora desde la cual la agenda queda libre. <b>Este es el dato comercial</b>: si dice que hay espacio desde las 2:00 p.m., hay margen para vender una visita más ese día.</li>
+    </ul>
+
+    <h3>Resumen</h3>
+    <p>Los cinco indicadores del día: visitas agendadas, completadas, facturado, kilómetros recorridos y tiempo promedio por visita. Debajo:</p>
+    <ul class="limpia">
+      <li><b>Citas del día.</b> La lista completa en orden de ruta, con mascota, dueño, teléfono, motivo y estado. El motivo aparece en las palabras del cliente, con una marca de prioridad cuando el caso lo amerita.</li>
+      <li><b>Ver historial.</b> El botón junto a cada dueño abre los antecedentes de esa mascota: visitas anteriores, fechas y observaciones del veterinario. Útil antes de devolver una llamada.</li>
+      <li><b>Disponibilidad del veterinario.</b> Línea de tiempo de la jornada, bloque por bloque, con el nombre de la mascota en cada visita y los huecos libres a la vista.</li>
+      <li><b>Esta semana.</b> Comparativo de visitas por día.</li>
+      <li><b>Observaciones del día.</b> Lo que escribió el veterinario al cerrar cada visita, reunido en un solo lugar.</li>
+    </ul>
+
+    <h3>Informes</h3>
+    <p>Para revisar un periodo completo en vez de un solo día.</p>
+    <ol class="pasos">
+      <li>Entra a <b>Informes</b> en el menú de la izquierda.</li>
+      <li>Elige <b>Hoy</b>, <b>Semana</b>, <b>Mes</b>, o define un <b>rango</b> con fecha desde y hasta.</li>
+      <li>Verás visitas atendidas, ingresos, ticket promedio y el desglose por especie y por método de pago.</li>
+      <li>El botón de <b>exportar</b> descarga exactamente el periodo que estás viendo, en un archivo que abre en Excel.</li>
+    </ol>
+    <p class="nota">Los ingresos salen de lo que el veterinario registra al cerrar cada visita. Si un valor quedó mal digitado, escríbenos y lo corregimos en la base: no es editable desde el panel, a propósito, para que los informes no se puedan alterar después de emitidos.</p>
+  </section>
+
+  <!-- ================= 3 ================= -->
+  <section class="parte" id="app">
+    <h2>3 · App del veterinario</h2>
+    <p>Se usa desde el celular, en la calle. Está pensada para operarse con una mano y con guantes puestos.</p>
+
+    <h3>Instalarla en el celular</h3>
+    <ol class="pasos">
+      <li>Abre en el navegador del celular la dirección de la app del veterinario.</li>
+      <li>En <b>iPhone</b>: botón de compartir, luego <i>Añadir a pantalla de inicio</i>. En <b>Android</b>: menú de tres puntos, luego <i>Instalar aplicación</i>.</li>
+      <li>Queda como cualquier otra app, con su ícono. Se entra una sola vez: la sesión no se cierra sola.</li>
+    </ol>
+
+    <h3>Una jornada, paso a paso</h3>
+    <ol class="pasos">
+      <li><b>Abrir la app.</b> Arriba aparece el total de visitas, cuántas van completadas y los kilómetros del día.</li>
+      <li><b>Revisar la lista.</b> Las visitas están en el orden de ruta calculado. La siguiente aparece resaltada. Si un caso es prioritario, se indica junto a la hora.</li>
+      <li><b>Abrir la visita.</b> Muestra dirección, hora y el bloque <b>“Antes de entrar”</b>: lo que reportó el dueño y el material sugerido según esos síntomas. <b>Conviene leerlo antes de bajarse del carro.</b></li>
+      <li><b>Abrir en Google Maps.</b> El enlace lleva directo a la dirección de la visita.</li>
+      <li><b>Check-in al llegar.</b> Botón <i>Llegué</i>. Arranca un cronómetro que mide el tiempo real de consulta.</li>
+      <li><b>Check-out al salir.</b> Botón <i>Finalizar visita</i>. Pide tres datos obligatorios: <b>observaciones</b> de la consulta, <b>valor cobrado</b> y <b>método de pago</b>.</li>
+      <li><b>Cierre de jornada.</b> Al completar la última visita aparece el resumen del día y la agenda libre queda visible para MÜVA en el panel.</li>
+    </ol>
+
+    <div class="nota">
+      <b>Por qué los tres datos del cierre son obligatorios.</b> Son los que alimentan los informes de MÜVA. Sin ellos la visita no se puede cerrar. Las observaciones quedan además en el historial de la mascota, disponibles en la siguiente visita.
+    </div>
+
+    <div class="bloque">
+      <h4>Si algo falla</h4>
+      <ul class="limpia">
+        <li><b>Sin señal en la calle.</b> La app abre igual con lo último que cargó. El check-in y el check-out sí necesitan conexión: cuando vuelva la señal, se registran.</li>
+        <li><b>No carga la jornada.</b> Aparece un botón de <i>Reintentar</i>. Una falla de red no cierra la sesión ni borra nada.</li>
+        <li><b>La ruta no está ordenada.</b> El orden se calcula la noche anterior a las 8:00 p.m. Una cita agendada después de esa hora aparece en la jornada, pero al final de la lista hasta el siguiente cálculo.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= 4 ================= -->
+  <section class="parte" id="asistente">
+    <h2>4 · Asistente de WhatsApp</h2>
+    <p>Es un asistente automatizado que atiende el chat de MÜVA. Conversa en lenguaje natural, entiende el caso, establece la urgencia y deja la cita agendada. Responde a cualquier hora, incluidos fines de semana, y atiende varias conversaciones a la vez.</p>
+
+    <div class="si-no">
+      <div>
+        <h4>Qué hace</h4>
+        <ul class="limpia">
+          <li>Responde saludos y preguntas generales del servicio.</li>
+          <li>Pregunta qué le pasa a la mascota y desde cuándo.</li>
+          <li>Establece si es urgencia, consulta, vacunación o control.</li>
+          <li>Toma los datos, agenda y crea el evento en el calendario.</li>
+          <li>Le indica al dueño qué preparar antes de la visita: guardar una muestra, no bañar a la mascota, ayuno cuando corresponde.</li>
+          <li>Reconoce a quien ya escribió antes y no le vuelve a pedir sus datos.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Qué no hace</h4>
+        <ul class="limpia">
+          <li><b>No diagnostica.</b> No dice qué enfermedad puede ser, ni siquiera de forma tentativa.</li>
+          <li><b>No receta.</b> No sugiere medicamentos, dosis ni remedios caseros. Si le preguntan, responde que no le den nada hasta que lo vea el veterinario.</li>
+          <li>No da precios que no le hayan sido definidos.</li>
+          <li>No promete una hora exacta de llegada.</li>
+          <li>No agenda fuera de la franja de 8:00 a.m. a 4:00 p.m.</li>
+          <li>No afirma ser una persona. Si le preguntan directamente, responde que es el asistente de MÜVA y continúa.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="alerta">
+      <b>Protocolo de urgencias.</b> Cuando el mensaje contiene señales de emergencia real —dificultad para respirar, convulsiones, atropellamiento, sospecha de intoxicación, sangrado que no para, un gato macho que no logra orinar, entre otras— el asistente <b>no agenda una visita a domicilio</b>. Indica llevar la mascota de inmediato a una clínica veterinaria de urgencias 24 horas, explica por qué no da espera, y solo después ofrece coordinar el seguimiento a domicilio.
+      <br><br>
+      Esta decisión es deliberada: hay cuadros que un domicilio no resuelve y en los que cada hora de espera cuenta. Los criterios exactos se entregan en el documento <i>Reglas de triaje del chat</i> y <b>deben ser revisados y aprobados por el veterinario de MÜVA</b>. Cualquier ajuste que él indique se aplica al sistema.
+    </div>
+
+    <h3>Qué hacer cuando…</h3>
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>Situación</th><th>Qué hacer</th></tr></thead>
+        <tbody>
+          <tr><td>Un cliente pide algo que el asistente no cubre (un servicio nuevo, una cotización especial)</td><td>Escribirle directamente desde el WhatsApp de MÜVA. Una persona puede intervenir en cualquier conversación en cualquier momento.</td></tr>
+          <tr><td>El asistente entendió mal un dato</td><td>El cliente puede corregirlo en el mismo chat. Si la cita ya quedó agendada con un error, se corrige desde MÜVA avisándonos.</td></tr>
+          <tr><td>Llega una foto, un audio o un sticker</td><td>El asistente responde que no puede verlo y pide que se lo escriban. Las imágenes y audios no se procesan.</td></tr>
+          <tr><td>Se quiere cambiar el tono, una respuesta o un criterio</td><td>Es un ajuste de configuración, no un desarrollo nuevo. Basta con indicar qué debería decir en su lugar.</td></tr>
+          <tr><td>Un caso de urgencia real entra por el chat</td><td>El asistente ya lo derivó a clínica 24 horas. La conversación queda registrada y visible para MÜVA.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= 5 ================= -->
+  <section class="parte" id="datos">
+    <h2>5 · Datos y privacidad</h2>
+    <ul class="limpia">
+      <li>Se almacenan los datos necesarios para prestar el servicio: nombre del dueño, teléfono o usuario del canal, nombre y especie de la mascota, dirección, motivo de consulta y el historial de visitas.</li>
+      <li>La información vive en una base de datos privada con acceso restringido. Ni el navegador ni la app del veterinario reciben nunca las llaves de acceso: todo pasa por el servidor.</li>
+      <li>Cada usuario solo ve lo que su rol permite. El veterinario no accede a la facturación global ni a los informes.</li>
+      <li>La política de privacidad publicada para Meta está disponible en <code>/privacy.html</code> dentro del mismo dominio.</li>
+      <li>Los datos son de MÜVA. Se pueden exportar en cualquier momento.</li>
+    </ul>
+  </section>
+
+  <!-- ================= 6 ================= -->
+  <section class="parte" id="soporte">
+    <h2>6 · Soporte y mantenimiento</h2>
+    <p>Según lo pactado en el contrato, el mantenimiento mensual cubre:</p>
+    <div class="si-no">
+      <div>
+        <h4>Incluido</h4>
+        <ul class="limpia">
+          <li>Corrección de errores de funcionamiento.</li>
+          <li>Actualizaciones menores de seguridad y compatibilidad.</li>
+          <li>Ajustes de criterios y respuestas del asistente.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Se cotiza aparte</h4>
+        <ul class="limpia">
+          <li>Funcionalidades nuevas.</li>
+          <li>Cambios de diseño.</li>
+          <li>Integraciones adicionales.</li>
+          <li>Migraciones de infraestructura.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="nota">Para reportar un error, ayuda mucho enviar: qué se estaba haciendo, en cuál de las tres herramientas, a qué hora, y una captura de pantalla si la hay.</p>
+  </section>
+
+  <p class="pie">Manual de uso · MARKETEADOS · Brayan Salazar Beltrán. Elaborado para RCS CAPITAL PARTNERS S.A.S. en el marco del contrato MKT-CONT-2026-001.</p>
+</div>

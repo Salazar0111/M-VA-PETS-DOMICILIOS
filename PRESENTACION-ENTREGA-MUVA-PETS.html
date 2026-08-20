@@ -1,0 +1,203 @@
+<title>MÜVA PETS · Entrega de la plataforma</title>
+<style>
+  /* Misma familia visual que el manual y el documento de triaje: los tres
+     son entregables del mismo proyecto y deben leerse como un conjunto.
+     Paleta del manual de marca de MÜVA. Sin fuentes externas. */
+  :root{
+    --paper:#faf7f2; --card:#ffffff; --ink:#2b3022; --forest:#303926;
+    --sage:#76836a; --terra:#be7c60; --camel:#bb9a7f;
+    --muted:#857f70; --line:rgba(48,57,38,.13); --line-soft:rgba(48,57,38,.07);
+    --ok:#566b47; --ok-tinte:rgba(118,131,106,.15);
+    --pend:#7d6349; --pend-tinte:rgba(187,154,127,.24);
+    --ojo:#9a5a3e; --ojo-tinte:rgba(190,124,96,.16);
+    --display:Georgia,'Times New Roman',serif;
+    --ui:ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#171b13; --card:#1f2419; --ink:#e6e1d5; --forest:#dfe6d3;
+      --sage:#9aa78d; --muted:#9b9585; --line:rgba(231,223,211,.16); --line-soft:rgba(231,223,211,.09);
+      --ok:#a3bb8e; --ok-tinte:rgba(163,187,142,.14);
+      --pend:#cdb193; --pend-tinte:rgba(205,177,147,.14);
+      --ojo:#dda184; --ojo-tinte:rgba(221,161,132,.14);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#171b13; --card:#1f2419; --ink:#e6e1d5; --forest:#dfe6d3;
+    --sage:#9aa78d; --muted:#9b9585; --line:rgba(231,223,211,.16); --line-soft:rgba(231,223,211,.09);
+    --ok:#a3bb8e; --ok-tinte:rgba(163,187,142,.14);
+    --pend:#cdb193; --pend-tinte:rgba(205,177,147,.14);
+    --ojo:#dda184; --ojo-tinte:rgba(221,161,132,.14);
+  }
+
+  body{background:var(--paper);color:var(--ink);font-family:var(--ui);line-height:1.6;
+       -webkit-font-smoothing:antialiased}
+  .hoja{max-width:48rem;margin:0 auto;padding:clamp(2rem,6vw,4rem) clamp(1.1rem,4vw,2rem) 5rem;
+        display:flex;flex-direction:column;gap:3.25rem}
+
+  .marca{font-family:var(--display);font-size:1.7rem;color:var(--forest);line-height:1}
+  .eyebrow{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);font-weight:600}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(2.1rem,6.5vw,3.2rem);color:var(--forest);
+     line-height:1.08;letter-spacing:-.02em;text-wrap:balance;margin:.7rem 0 .7rem}
+  .bajada{font-size:1.06rem;max-width:38rem}
+  .meta-doc{font-size:.85rem;color:var(--muted);margin-top:1.4rem;
+            border-top:1px solid var(--line-soft);padding-top:1rem}
+
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(1.4rem,4vw,1.85rem);color:var(--forest);
+     line-height:1.2;text-wrap:balance}
+  section{display:flex;flex-direction:column;gap:1.15rem}
+  .parte{border-top:2px solid var(--forest);padding-top:1.15rem}
+  section > p{margin:0;font-size:1rem}
+
+  .piezas{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem}
+  .pieza{background:var(--card);border:1px solid var(--line);border-radius:.7rem;padding:1.25rem;
+         display:flex;flex-direction:column;gap:.5rem}
+  .pieza .quien{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--terra);font-weight:700}
+  .pieza h3{font-family:var(--display);font-weight:400;font-size:1.22rem;color:var(--forest);line-height:1.2}
+  .pieza p{font-size:.93rem;margin:0}
+
+  /* El recorrido SÍ es una secuencia real, por eso va numerado. */
+  .flujo{display:flex;flex-direction:column;gap:0;counter-reset:paso}
+  .paso{display:grid;grid-template-columns:2.3rem 1fr;gap:1rem;padding:1rem 0;
+        border-bottom:1px solid var(--line-soft)}
+  .paso:last-child{border-bottom:none}
+  .paso .n{counter-increment:paso;font-family:var(--display);font-size:1.1rem;color:var(--terra);
+           width:2.3rem;height:2.3rem;border:1px solid var(--line);border-radius:50%;
+           display:flex;align-items:center;justify-content:center}
+  .paso .n::before{content:counter(paso)}
+  .paso h4{font-size:.98rem;font-weight:700;color:var(--forest);margin-bottom:.15rem}
+  .paso p{font-size:.92rem;margin:0;color:var(--ink)}
+  .paso .quien-min{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+                   font-weight:600;margin-top:.3rem}
+
+  .tabla-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:.7rem;background:var(--card)}
+  table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:33rem}
+  th,td{text-align:left;padding:.75rem .9rem;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  tr:last-child td{border-bottom:none}
+  td.mod{font-weight:600;color:var(--forest)}
+
+  .est{display:inline-block;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+       padding:.25rem .55rem;border-radius:99px;white-space:nowrap}
+  .est.ok{background:var(--ok-tinte);color:var(--ok)}
+  .est.pend{background:var(--pend-tinte);color:var(--pend)}
+  .est.ojo{background:var(--ojo-tinte);color:var(--ojo)}
+
+  .cierre{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--terra);
+          border-radius:.55rem;padding:1.2rem 1.35rem;font-size:.97rem}
+  .cierre b{color:var(--forest)}
+  ul.limpia{padding-left:1.05rem;display:flex;flex-direction:column;gap:.55rem;font-size:.96rem}
+  ul.limpia li::marker{color:var(--camel)}
+  .pie{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:1.2rem}
+
+  @media print{
+    body{background:#fff}
+    .pieza,.tabla-wrap{break-inside:avoid}
+    .hoja{padding:0;gap:2rem}
+  }
+</style>
+
+<div class="hoja">
+  <header>
+    <div class="marca">müva</div>
+    <p class="eyebrow" style="margin-top:1rem">Entrega técnica</p>
+    <h1>Plataforma de agendamiento y operación veterinaria a domicilio</h1>
+    <p class="bajada">Un solo sistema que recibe la solicitud del cliente por chat, agenda la cita, arma la ruta del día, acompaña al veterinario en campo y cierra la jornada con números reales.</p>
+    <p class="meta-doc">MARKETEADOS para RCS CAPITAL PARTNERS S.A.S. · Contrato MKT-CONT-2026-001 · Julio de 2026</p>
+  </header>
+
+  <section class="parte">
+    <h2>Lo que se entrega</h2>
+    <p>Tres piezas conectadas entre sí. Cada una tiene un usuario distinto y ninguna necesita que alguien copie datos de una a otra.</p>
+    <div class="piezas">
+      <article class="pieza">
+        <span class="quien">Para el cliente final</span>
+        <h3>Asistente de agendamiento</h3>
+        <p>Atiende el WhatsApp de MÜVA. Conversa, entiende qué le pasa a la mascota, establece qué tan urgente es y deja la cita agendada. Trabaja de noche, en festivos y con varias personas a la vez.</p>
+      </article>
+      <article class="pieza">
+        <span class="quien">Para el veterinario</span>
+        <h3>App de jornada</h3>
+        <p>Se instala en el celular. Muestra la ruta del día en orden, qué tiene cada paciente antes de tocar la puerta, y registra la llegada y la salida de cada visita.</p>
+      </article>
+      <article class="pieza">
+        <span class="quien">Para MÜVA</span>
+        <h3>Panel de operación</h3>
+        <p>Qué está pasando hoy, dónde va el veterinario, cuánto se facturó, cuándo tiene un espacio libre para vender, y los informes del periodo exportables a Excel.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="parte">
+    <h2>El recorrido de una cita</h2>
+    <p>De principio a fin, sin que nadie transcriba nada a mano.</p>
+    <div class="flujo">
+      <div class="paso"><div class="n"></div><div>
+        <h4>Alguien escribe al WhatsApp</h4>
+        <p>Un “hola”, un “buenas tardes” o directamente “mi perra está vomitando”. El asistente responde y conversa.</p>
+        <div class="quien-min">Asistente</div>
+      </div></div>
+      <div class="paso"><div class="n"></div><div>
+        <h4>Se establece la urgencia</h4>
+        <p>Antes de hablar de horarios averigua qué pasa y desde cuándo. Si aparecen señales de emergencia real, no agenda: indica llevar la mascota a una clínica 24 horas de inmediato.</p>
+        <div class="quien-min">Asistente</div>
+      </div></div>
+      <div class="paso"><div class="n"></div><div>
+        <h4>Queda la cita y el evento en el calendario</h4>
+        <p>Se registra el paciente, se crea el evento en el Google Calendar de MÜVA y se guarda el historial del cliente y de la mascota.</p>
+        <div class="quien-min">Automático</div>
+      </div></div>
+      <div class="paso"><div class="n"></div><div>
+        <h4>Se arma la ruta óptima</h4>
+        <p>Cada noche a las 8:00 p.m. el sistema ordena las visitas del día siguiente por cercanía y calcula kilómetros y tiempos de desplazamiento. Si entra una urgencia durante la jornada, la ruta se reordena sola para encajarla.</p>
+        <div class="quien-min">Automático</div>
+      </div></div>
+      <div class="paso"><div class="n"></div><div>
+        <h4>El veterinario atiende</h4>
+        <p>Abre su app, ve la ruta en orden y, en cada paciente, qué reportó el dueño y qué material conviene llevar. Marca llegada al entrar y cierra la visita al salir con observaciones, valor y forma de pago.</p>
+        <div class="quien-min">Veterinario</div>
+      </div></div>
+      <div class="paso"><div class="n"></div><div>
+        <h4>MÜVA ve el cierre</h4>
+        <p>Visitas atendidas, kilómetros, tiempo en consulta, facturación del día y los espacios libres que quedaron en la agenda. Todo consultable por día, semana, mes o rango, y exportable a Excel.</p>
+        <div class="quien-min">MÜVA</div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="parte">
+    <h2>Estado de los módulos</h2>
+    <p>Los módulos acordados en la Cláusula Segunda del contrato, con su estado real a la fecha de esta entrega.</p>
+    <div class="tabla-wrap">
+      <table>
+        <thead><tr><th>Módulo</th><th>Estado</th><th>Detalle</th></tr></thead>
+        <tbody>
+          <tr><td class="mod">App del veterinario</td><td><span class="est ok">Entregado</span></td><td>Instalable en el celular, funcionando con datos reales.</td></tr>
+          <tr><td class="mod">Agendamiento por WhatsApp</td><td><span class="est ok">Entregado</span></td><td>Atendiendo sobre el número de pruebas hasta que MÜVA confirme el definitivo.</td></tr>
+          <tr><td class="mod">Google Calendar</td><td><span class="est ok">Entregado</span></td><td>Cada cita confirmada crea el evento en el calendario de MÜVA, con dirección, motivo y material sugerido.</td></tr>
+          <tr><td class="mod">Motor de rutas</td><td><span class="est ok">Entregado</span></td><td>Cada noche a las 8:00 p.m. ordena las visitas del día siguiente por cercanía y calcula kilómetros y tiempos de desplazamiento.</td></tr>
+          <tr><td class="mod">Citas urgentes del mismo día</td><td><span class="est ok">Entregado</span></td><td>Una urgencia que entra durante la jornada se agenda y <b>reordena automáticamente la ruta en curso</b>, para que el veterinario la vea en el lugar que le corresponde y no al final de la lista.</td></tr>
+          <tr><td class="mod">Check-in / check-out</td><td><span class="est ok">Entregado</span></td><td>Con cronómetro y cálculo automático del tiempo efectivo de consulta.</td></tr>
+          <tr><td class="mod">Dashboard de cierre</td><td><span class="est ok">Entregado</span></td><td>Kilómetros, desplazamiento, tiempo en consulta, visitas y facturación.</td></tr>
+          <tr><td class="mod">Aviso de disponibilidad</td><td><span class="est ok">Entregado</span></td><td>Al cerrar una visita se recalcula el espacio libre y MÜVA lo ve en el panel, con la hora desde la cual la agenda queda disponible.</td></tr>
+          <tr><td class="mod">Ventana de 8:00 a.m. a 4:00 p.m.</td><td><span class="est ok">Entregado</span></td><td>El sistema no permite agendar fuera de esa franja: propone otra hora dentro del horario.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="parte">
+    <h2>Lo que necesitamos de MÜVA</h2>
+    <ul class="limpia">
+      <li><b>Validación clínica del asistente.</b> El veterinario debe revisar la tabla de criterios con la que el sistema decide qué es urgente y qué material alistar. Se entrega en documento aparte. Es el único punto que recomendamos cerrar antes de abrir el canal a clientes reales.</li>
+      <li><b>Confirmación del número definitivo de WhatsApp.</b> Hoy opera sobre el número de pruebas, por decisión conjunta, hasta terminar la validación.</li>
+    </ul>
+  </section>
+
+  <section class="parte">
+    <h2>Cómo se usa</h2>
+    <p class="cierre">El <b>manual de uso</b> se entrega como documento independiente y cubre las tres piezas: cómo entra cada persona, qué hace cada pantalla, el paso a paso de una jornada del veterinario y qué hace —y qué no hace— el asistente de WhatsApp.</p>
+  </section>
+
+  <p class="pie">Documento de entrega · MARKETEADOS · Brayan Salazar Beltrán. Elaborado para RCS CAPITAL PARTNERS S.A.S. en el marco del contrato MKT-CONT-2026-001.</p>
+</div>

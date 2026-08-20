@@ -155,6 +155,35 @@ Carpetas `etapa-N-*/` en la raíz del proyecto solo contienen los `schema.sql` d
 
 Todo dato de prueba creado durante desarrollo se identificó con `contacto_id` empezando en `DEMO-`, `TEST-QA-`, o números de teléfono ficticios (57300...), y se borró al terminar cada ronda. Al cierre de esta sesión, la base solo tiene 2 citas reales antiguas (`Kleo`, sin dueño/teléfono, de pruebas muy tempranas) y las citas reales creadas hoy en la prueba con WhatsApp real. Verificar antes de asumir que la base está "limpia".
 
+## 11b. Entregables para el cliente (2026-07-25)
+
+Tres documentos en la raíz del proyecto, todos con la identidad de MÜVA y sin recursos externos:
+
+| Archivo | Para quién |
+|---|---|
+| `PRESENTACION-ENTREGA-MUVA-PETS.html` | RCS — qué se construyó, recorrido de una cita, estado real de cada módulo del contrato |
+| `MANUAL-DE-USO-MUVA-PETS.html` | RCS y el veterinario — accesos, panel, app, asistente, datos, alcance del soporte |
+| `TRIAJE-PARA-REVISION-DEL-VETERINARIO.{md,html}` | El veterinario — reglas clínicas a validar. Se **genera** con `node scripts/generar-tabla-triaje.js` |
+
+Publicados en **https://muva-pets-docs.vercel.app** (Vercel, cuenta `salazar0111`, proyecto `muva-pets-docs`). Para actualizar:
+
+```bash
+node scripts/generar-tabla-triaje.js    # solo si cambió el triaje
+node scripts/construir-sitio-docs.js    # arma muva-pets-docs/
+cd ../muva-pets-docs && vercel deploy --prod --yes
+```
+
+`construir-sitio-docs.js` existe porque los tres HTML se escribieron como **fragmentos** para el visor de artefactos (empiezan en `<title>`, sin `<!doctype>`, `<head>` ni reset de CSS — eso lo ponía el visor). El script los envuelve en documentos completos, **descarta el `<style>` propio de cada uno** e inyecta el sistema visual compartido de `scripts/sitio/`. Lleva `noindex` y `robots.txt` con `Disallow: /`: el sitio es público por URL pero no aparece en buscadores.
+
+**Diseño (rehecho 2026-07-25):** estética cristal — paneles traslúcidos con `backdrop-filter` sobre lavados de color de la marca — con Fraunces + Jost cargadas de Google Fonts (en Vercel sí se puede; en el visor de artefactos no, por su CSP, y ahí caen al stack de respaldo). El diseño vive en **un solo lugar**: `scripts/sitio/estilo.css` y `scripts/sitio/interaccion.js`. No editar el CSS dentro de los HTML de origen: el constructor lo bota.
+
+**Regla que no se debe romper en `interaccion.js`:** el contenido nunca depende del JavaScript para ser visible. El CSS solo esconde bajo `html.animar`, que agrega el script; hay respaldo de reveal por scroll y un interruptor a los 2,5 s que comprueba la **opacidad pintada** de una pieza ya revelada y, si sigue en 0, quita `animar`. Tampoco se usa `requestAnimationFrame` para nada: se congela en pestañas de fondo y en algunos webviews, y con él se congelaría el texto. Se acelera con temporizadores.
+
+**Dos huecos frente a la Cláusula Segunda detectados al redactarlos** (documentados con honestidad en la presentación, no maquillados):
+
+1. **"Citas urgentes del mismo día con actualización de ruta en tiempo real"** — la urgencia se agenda y aparece de inmediato en la app y el panel, pero el reordenamiento de la ruta **no es automático**: el cron corre a las 8:00 p.m. para el día siguiente y el recálculo del día en curso solo se dispara llamando a mano `GET /rutas/calcular/:fecha` (requiere rol admin). Cerrarlo es pequeño: invocar `calcularRutaDelDia(hoy)` al crear una cita del mismo día.
+2. **"Notificación automática a MÜVA cuando el veterinario tenga disponibilidad libre"** — `notificarDisponibilidad()` sí se dispara en cada check-out y escribe en la tabla `notificaciones`, y el panel lo muestra, pero **no envía nada por WhatsApp**. La columna `enviada_whatsapp` existe y nadie la usa. Es notificación *pasiva* (hay que mirar el panel), no *push*.
+
 ## 12. Próximo paso
 
 Terminar de desplegar la Etapa 8 (sección 13): correr la migración SQL, setear las variables nuevas en Railway y probar por WhatsApp con el número de prueba.

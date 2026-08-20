@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f7f3ec" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#12160f" media="(prefers-color-scheme:dark)">
+<meta name="description" content="Los criterios clínicos con los que el asistente decide qué es urgente y qué material alistar. Pendiente de validación.">
+<title>MÜVA PETS · Reglas de triaje para revisión clínica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Jost:wght@400;500;600;700&display=swap">
+<style>
+/* MÜVA PETS · sistema visual del sitio de documentación
+   ---------------------------------------------------------------------
+   Un solo archivo para los tres documentos. Los HTML de origen solo
+   aportan estructura y nombres de clase; todo lo visual vive acá, así un
+   cambio de diseño no hay que repetirlo tres veces (y el de triaje, que
+   se genera por script, no queda desfasado).
+
+   La estética es "cristal": paneles traslúcidos con desenfoque sobre un
+   fondo con lavados de color de la marca. Se apoya en la paleta del
+   manual de MÜVA — bosque, salvia, terracota, camel, crema — no en un
+   gris genérico.                                                        */
+
+/* ─────────────────────────── tokens ─────────────────────────── */
+
+:root{
+  color-scheme: light dark;
+
+  --bosque:#303926; --salvia:#76836a; --terra:#be7c60; --camel:#bb9a7f;
+  --crema:#e7dfd3;
+
+  --fondo:#f7f3ec;
+  --tinta:#232817;
+  --tinta-2:#4a5140;
+  --tenue:#7d7768;
+
+  /* Cristal: relleno + borde + luz superior + sombra proyectada. Los
+     cuatro juntos son los que dan el volumen; con uno solo se ve plano. */
+  --vidrio:rgba(255,255,255,.58);
+  --vidrio-fuerte:rgba(255,255,255,.78);
+  --vidrio-borde:rgba(255,255,255,.85);
+  --vidrio-luz:inset 0 1px 0 rgba(255,255,255,.9);
+  --vidrio-sombra:0 1px 2px rgba(48,57,38,.04), 0 20px 44px -28px rgba(48,57,38,.5);
+  --vidrio-sombra-alta:0 2px 4px rgba(48,57,38,.05), 0 30px 60px -30px rgba(48,57,38,.55);
+  --desenfoque:blur(20px) saturate(155%);
+
+  --linea:rgba(48,57,38,.12);
+  --linea-suave:rgba(48,57,38,.07);
+
+  --ok:#4f6b3f;      --ok-fondo:rgba(118,131,106,.16);
+  --espera:#8a6b46;  --espera-fondo:rgba(187,154,127,.26);
+  --ojo:#a3542f;     --ojo-fondo:rgba(190,124,96,.18);
+  --alarma:#98351c;  --alarma-fondo:rgba(154,59,34,.09);
+
+  --display:'Fraunces',Georgia,'Times New Roman',serif;
+  --ui:'Jost',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --ancho:46rem;
+  --curva:1.1rem;
+  --curva-sm:.65rem;
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fondo:#12160f;
+    --tinta:#e9e4d8; --tinta-2:#c3bfb0; --tenue:#948e7f;
+    --bosque:#dfe6d3; --salvia:#9aa78d;
+    --vidrio:rgba(255,255,255,.055);
+    --vidrio-fuerte:rgba(255,255,255,.085);
+    --vidrio-borde:rgba(255,255,255,.13);
+    --vidrio-luz:inset 0 1px 0 rgba(255,255,255,.09);
+    --vidrio-sombra:0 1px 2px rgba(0,0,0,.3), 0 22px 48px -30px rgba(0,0,0,.8);
+    --vidrio-sombra-alta:0 2px 6px rgba(0,0,0,.35), 0 34px 66px -32px rgba(0,0,0,.85);
+    --linea:rgba(233,228,216,.14); --linea-suave:rgba(233,228,216,.08);
+    --ok:#a8c191; --ok-fondo:rgba(163,187,142,.15);
+    --espera:#d3b795; --espera-fondo:rgba(205,177,147,.15);
+    --ojo:#e0a184; --ojo-fondo:rgba(221,161,132,.15);
+    --alarma:#ef8f74; --alarma-fondo:rgba(232,132,106,.13);
+  }
+}
+:root[data-theme="dark"]{
+  --fondo:#12160f;
+  --tinta:#e9e4d8; --tinta-2:#c3bfb0; --tenue:#948e7f;
+  --bosque:#dfe6d3; --salvia:#9aa78d;
+  --vidrio:rgba(255,255,255,.055);
+  --vidrio-fuerte:rgba(255,255,255,.085);
+  --vidrio-borde:rgba(255,255,255,.13);
+  --vidrio-luz:inset 0 1px 0 rgba(255,255,255,.09);
+  --vidrio-sombra:0 1px 2px rgba(0,0,0,.3), 0 22px 48px -30px rgba(0,0,0,.8);
+  --vidrio-sombra-alta:0 2px 6px rgba(0,0,0,.35), 0 34px 66px -32px rgba(0,0,0,.85);
+  --linea:rgba(233,228,216,.14); --linea-suave:rgba(233,228,216,.08);
+  --ok:#a8c191; --ok-fondo:rgba(163,187,142,.15);
+  --espera:#d3b795; --espera-fondo:rgba(205,177,147,.15);
+  --ojo:#e0a184; --ojo-fondo:rgba(221,161,132,.15);
+  --alarma:#ef8f74; --alarma-fondo:rgba(232,132,106,.13);
+}
+
+/* ─────────────────────────── base ─────────────────────────── */
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+img,svg{max-width:100%;height:auto;display:block}
+
+body{
+  background:var(--fondo);
+  color:var(--tinta);
+  font-family:var(--ui);
+  font-size:1.03rem;
+  line-height:1.72;
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+  overflow-x:hidden;
+}
+
+/* Lavados de color detrás del cristal. Sin esto el desenfoque no tiene
+   nada que desenfocar y los paneles se ven como cajas blancas. */
+.ambiente{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.ambiente i{
+  position:absolute;display:block;border-radius:50%;
+  filter:blur(90px);opacity:.5;
+  will-change:transform;
+}
+.ambiente i:nth-child(1){width:46vw;height:46vw;top:-8vw;left:-10vw;background:rgba(118,131,106,.5)}
+.ambiente i:nth-child(2){width:40vw;height:40vw;top:32vh;right:-14vw;background:rgba(190,124,96,.42)}
+.ambiente i:nth-child(3){width:38vw;height:38vw;bottom:-12vw;left:18vw;background:rgba(187,154,127,.42)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .ambiente i{opacity:.26;filter:blur(110px)}
+}
+:root[data-theme="dark"] .ambiente i{opacity:.26;filter:blur(110px)}
+
+/* ─────────────────────── barra de lectura ─────────────────────── */
+
+.progreso{
+  position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;
+  transform:scaleX(0);z-index:60;
+  background:linear-gradient(90deg,var(--salvia),var(--terra));
+}
+
+/* Cabecera flotante: aparece cuando ya pasaste el título. */
+.barra{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.7rem clamp(1rem,4vw,2rem);
+  background:var(--vidrio-fuerte);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  border-bottom:1px solid transparent;
+  opacity:0;transform:translateY(-100%);
+  transition:opacity .3s ease,transform .3s ease,border-color .3s ease;
+}
+.barra.on{opacity:1;transform:translateY(0);border-bottom-color:var(--linea)}
+.barra .b-doc{font-family:var(--display);font-weight:600;font-size:1rem;color:var(--bosque);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barra .b-doc span{color:var(--terra)}
+.barra a{
+  font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--tinta-2);text-decoration:none;white-space:nowrap;
+  padding:.45rem .8rem;border-radius:100px;border:1px solid var(--linea);
+  transition:color .2s,border-color .2s,background .2s;
+}
+.barra a:hover{color:var(--terra);border-color:var(--terra);background:var(--ojo-fondo)}
+
+/* ─────────────────────────── hoja ─────────────────────────── */
+
+.hoja{
+  max-width:var(--ancho);margin:0 auto;
+  padding:clamp(3rem,9vw,6rem) clamp(1.15rem,4vw,2rem) 7rem;
+  display:flex;flex-direction:column;gap:clamp(2.75rem,6vw,4rem);
+}
+
+.marca{
+  font-family:var(--display);font-weight:600;font-size:2rem;color:var(--bosque);
+  line-height:1;letter-spacing:-.01em;
+}
+.eyebrow{
+  font-size:.74rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--terra);margin-top:1.1rem;
+}
+
+/* "Letra bond más grande": el h1 es el ancla visual de cada documento. */
+h1{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(2.5rem,7.5vw,4.4rem);
+  color:var(--bosque);line-height:.98;letter-spacing:-.035em;
+  text-wrap:balance;margin:.85rem 0 .9rem;
+}
+h2{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(1.75rem,4.6vw,2.7rem);
+  color:var(--bosque);line-height:1.06;letter-spacing:-.025em;text-wrap:balance;
+}
+h3{
+  font-family:var(--display);font-weight:600;font-size:clamp(1.2rem,2.6vw,1.5rem);
+  color:var(--bosque);line-height:1.2;letter-spacing:-.015em;margin-top:.5rem;
+}
+h4{
+  font-size:.72rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--tenue);
+}
+b{font-weight:700;color:var(--bosque)}
+i{font-style:italic}
+
+.bajada,.intro{font-size:clamp(1.06rem,2.1vw,1.22rem);line-height:1.6;color:var(--tinta-2);max-width:36rem}
+.descargo{font-weight:700;color:var(--bosque);font-size:1.06rem}
+.fecha,.meta-doc{
+  font-size:.87rem;color:var(--tenue);margin-top:1.5rem;
+  border-top:1px solid var(--linea-suave);padding-top:1.05rem;
+}
+
+section{display:flex;flex-direction:column;gap:1.15rem;scroll-margin-top:5rem}
+section>p,.bloque>p{font-size:1.02rem}
+
+/* Título de sección: la línea corta en terracota reemplaza al filete
+   grueso; pesa menos y ordena igual. */
+.parte{padding-top:1.6rem;position:relative}
+.parte::before{
+  content:'';position:absolute;top:0;left:0;width:3rem;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--terra),var(--camel));
+}
+
+/* ─────────────────────── superficie de cristal ─────────────────────── */
+
+.pieza,.bloque,.mini,.caso,.tabla-wrap,.indice,.cierre,.nota,.alerta,
+.si-no>div,.doc{
+  background:var(--vidrio);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  border:1px solid var(--vidrio-borde);
+  border-radius:var(--curva);
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra);
+}
+
+.pieza,.bloque,.mini,.caso,.si-no>div{padding:1.4rem 1.5rem;display:flex;flex-direction:column;gap:.65rem}
+.indice,.cierre{padding:1.4rem 1.55rem}
+.nota,.alerta{padding:1.15rem 1.35rem}
+
+/* Reveal de hairline en el borde superior al pasar el mouse: la única
+   animación de hover, y solo en lo que es tarjeta. */
+.pieza,.mini,.caso,.doc{position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.25,1),box-shadow .35s,border-color .35s}
+.pieza::after,.mini::after,.caso::after,.doc::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--terra),var(--camel));
+  transform:scaleX(0);transform-origin:left;transition:transform .45s cubic-bezier(.2,.8,.25,1);
+}
+.pieza:hover,.mini:hover,.caso:hover,.doc:hover{
+  transform:translateY(-3px);box-shadow:var(--vidrio-luz),var(--vidrio-sombra-alta);
+  border-color:rgba(190,124,96,.4);
+}
+.pieza:hover::after,.mini:hover::after,.caso:hover::after,.doc:hover::after{transform:scaleX(1)}
+
+/* ─────────────────────────── portada ─────────────────────────── */
+
+.docs{display:flex;flex-direction:column;gap:1rem}
+.doc{padding:1.6rem 1.7rem;text-decoration:none;color:inherit;gap:.5rem}
+.doc .para{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--terra)}
+.doc h2{font-size:clamp(1.45rem,3.4vw,1.9rem)}
+.doc p{font-size:1rem;color:var(--tinta-2)}
+.doc .ir{font-size:.86rem;font-weight:600;color:var(--salvia);margin-top:.3rem;
+  display:inline-flex;align-items:center;gap:.4rem;transition:gap .3s,color .3s}
+.doc:hover .ir{gap:.75rem;color:var(--terra)}
+.doc:focus-visible{outline:2px solid var(--terra);outline-offset:3px}
+
+/* ────────────────────── presentación de entrega ────────────────────── */
+
+.piezas{display:grid;grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr));gap:1rem}
+.pieza .quien{font-size:.68rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;color:var(--terra)}
+.pieza p{font-size:.97rem;color:var(--tinta-2)}
+
+/* El recorrido es una secuencia real; por eso va numerado. */
+.flujo{display:flex;flex-direction:column;gap:.55rem;counter-reset:paso}
+.paso{
+  display:grid;grid-template-columns:2.9rem 1fr;gap:1.1rem;align-items:start;
+  padding:1.15rem 1.3rem;border-radius:var(--curva-sm);
+  background:var(--vidrio);border:1px solid var(--vidrio-borde);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  box-shadow:var(--vidrio-luz);
+  transition:border-color .35s,transform .35s cubic-bezier(.2,.8,.25,1);
+}
+.paso:hover{border-color:rgba(190,124,96,.4);transform:translateX(4px)}
+.paso .n{
+  counter-increment:paso;width:2.9rem;height:2.9rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:700;font-size:1.15rem;color:var(--terra);
+  background:var(--ojo-fondo);border:1px solid rgba(190,124,96,.32);
+}
+.paso .n::before{content:counter(paso)}
+.paso h4{font-family:var(--ui);font-size:1.04rem;font-weight:700;letter-spacing:0;
+  text-transform:none;color:var(--bosque);margin-bottom:.2rem}
+.paso p{font-size:.97rem;color:var(--tinta-2)}
+.paso .quien-min{font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--salvia);margin-top:.5rem}
+
+.cierre{border-left:3px solid var(--terra);font-size:1.02rem}
+
+/* ─────────────────────────── tablas ─────────────────────────── */
+
+.tabla-wrap{overflow-x:auto;padding:0}
+table{border-collapse:collapse;width:100%;font-size:.96rem;min-width:31rem}
+th,td{text-align:left;padding:.9rem 1.05rem;border-bottom:1px solid var(--linea-suave);vertical-align:top}
+th{font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--tenue);
+   background:var(--vidrio-fuerte)}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .25s}
+tbody tr:hover{background:var(--ojo-fondo)}
+td.mod{font-weight:700;color:var(--bosque)}
+
+/* Estados y niveles: la forma comunica tanto como el texto. */
+.est,.pill{
+  display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;padding:.32rem .68rem;border-radius:100px;white-space:nowrap;
+  border:1px solid transparent;
+}
+.est.ok{background:var(--ok-fondo);color:var(--ok);border-color:rgba(118,131,106,.3)}
+.est.pend,.pill.media{background:var(--espera-fondo);color:var(--espera);border-color:rgba(187,154,127,.4)}
+.est.ojo,.pill.alta{background:var(--ojo-fondo);color:var(--ojo);border-color:rgba(190,124,96,.35)}
+.pill.baja{background:var(--ok-fondo);color:var(--ok);border-color:rgba(118,131,106,.3)}
+
+/* ─────────────────────────── listas ─────────────────────────── */
+
+ul.limpia,ul.puntos,ul.generales{padding-left:1.15rem;display:flex;flex-direction:column;gap:.6rem;font-size:1rem}
+ol.pasos{padding-left:1.3rem;display:flex;flex-direction:column;gap:.7rem;font-size:1rem}
+ul.limpia li::marker,ul.puntos li::marker,ul.generales li::marker{color:var(--camel)}
+ol.pasos li::marker{color:var(--terra);font-weight:700}
+li{padding-left:.15rem}
+
+.dl{display:grid;grid-template-columns:auto 1fr;gap:.6rem 1.2rem;font-size:.98rem;align-items:baseline}
+.dl dt{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);white-space:nowrap}
+code{
+  font-family:var(--mono);font-size:.86em;
+  background:var(--vidrio-fuerte);border:1px solid var(--linea-suave);
+  border-radius:.35rem;padding:.15rem .4rem;word-break:break-all;
+}
+
+/* ───────────────────── llamados y avisos ───────────────────── */
+
+.nota{border-left:3px solid var(--camel);font-size:.99rem;color:var(--tinta-2)}
+.nota b{color:var(--bosque)}
+.alerta{border-left:3px solid var(--alarma);background:var(--alarma-fondo);font-size:1rem}
+.alerta b{color:var(--alarma)}
+.aviso{color:var(--alarma);font-weight:700}
+.pedido{
+  background:var(--vidrio);border:1px solid var(--vidrio-borde);border-left:3px solid var(--terra);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  border-radius:var(--curva);padding:1.2rem 1.4rem;font-size:1.02rem;
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra);
+}
+
+.duo,.si-no{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem}
+.mini p{font-size:.96rem;color:var(--tinta-2)}
+.si-no ul{margin-top:.15rem}
+
+/* ─────────────────── índice del manual (pegajoso) ─────────────────── */
+
+.indice h2{font-family:var(--ui);font-size:.72rem;font-weight:700;letter-spacing:.17em;
+  text-transform:uppercase;color:var(--tenue);margin-bottom:.9rem;letter-spacing:.17em}
+.indice ol{padding-left:0;list-style:none;counter-reset:idx;display:flex;flex-direction:column;gap:.15rem}
+.indice li{counter-increment:idx}
+.indice a{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.5rem .7rem;border-radius:.5rem;
+  color:var(--tinta-2);text-decoration:none;font-size:.98rem;font-weight:500;
+  transition:background .25s,color .25s;
+}
+.indice a::before{
+  content:counter(idx);flex:none;width:1.5rem;height:1.5rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;color:var(--salvia);
+  background:var(--ok-fondo);transition:background .25s,color .25s;
+}
+.indice a:hover{background:var(--ojo-fondo);color:var(--bosque)}
+.indice a.activo{background:var(--ojo-fondo);color:var(--bosque);font-weight:700}
+.indice a.activo::before{background:var(--terra);color:#fff}
+
+/* ─────────────────────────── triaje ─────────────────────────── */
+
+.caso.critico{border-left:3px solid var(--alarma);background:var(--alarma-fondo)}
+.caso-cab{display:flex;align-items:center;justify-content:space-between;gap:.85rem;flex-wrap:wrap}
+.nivel-nota{font-size:.9rem;color:var(--tenue);margin-top:-.35rem}
+.disparador{font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tenue)}
+.frases{list-style:none;display:flex;flex-wrap:wrap;gap:.45rem;padding:0}
+.frases li{
+  font-size:.92rem;padding:.3rem .68rem;border-radius:.45rem;
+  background:var(--vidrio-fuerte);border:1px solid var(--linea-suave);
+  color:var(--tinta);transition:border-color .25s,transform .25s;
+}
+.frases li:hover{border-color:rgba(190,124,96,.45);transform:translateY(-1px)}
+.sub{border-top:1px solid var(--linea-suave);padding-top:1rem;margin-top:.2rem}
+
+/* ─────────────────────────── pie ─────────────────────────── */
+
+.pie{font-size:.87rem;color:var(--tenue);border-top:1px solid var(--linea-suave);padding-top:1.4rem}
+
+/* ─────────────────────── volver arriba ─────────────────────── */
+
+.arriba{
+  position:fixed;right:clamp(1rem,3vw,2rem);bottom:clamp(1rem,3vw,2rem);z-index:55;
+  width:2.9rem;height:2.9rem;border-radius:50%;border:1px solid var(--vidrio-borde);
+  background:var(--vidrio-fuerte);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra);
+  color:var(--bosque);font-size:1.05rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(12px) scale(.9);pointer-events:none;
+  transition:opacity .3s,transform .3s cubic-bezier(.2,.8,.25,1),border-color .25s,color .25s;
+}
+.arriba.on{opacity:1;transform:none;pointer-events:auto}
+.arriba:hover{border-color:var(--terra);color:var(--terra)}
+
+/* ─────────────────── microinteracción de scroll ─────────────────── */
+
+/* El contenido NUNCA se oculta por CSS solo: se oculta únicamente si el
+   JavaScript alcanzó a marcar <html class="animar">. Si el script no
+   corre, si falla, o si el navegador congela los temporizadores, el
+   documento se ve completo igual. Un manual invisible por una animación
+   que no disparó es una falla peor que no tener animación. */
+.rv{transition:opacity .7s cubic-bezier(.2,.8,.25,1),transform .7s cubic-bezier(.2,.8,.25,1)}
+html.animar .rv{opacity:0;transform:translateY(26px)}
+html.animar .rv.on{opacity:1;transform:none}
+
+:focus-visible{outline:2px solid var(--terra);outline-offset:3px;border-radius:.35rem}
+
+/* ─────────────────────────── respeto ─────────────────────────── */
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.animar .rv{opacity:1;transform:none}
+  .ambiente i{filter:blur(90px)}
+}
+
+/* El desenfoque de fondo es caro en móviles viejos; si el navegador no
+   lo soporta, se compensa con un relleno más opaco para no perder
+   contraste ni legibilidad. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .pieza,.bloque,.mini,.caso,.tabla-wrap,.indice,.cierre,.nota,.alerta,
+  .si-no>div,.doc,.paso,.barra,.arriba,.pedido{background:rgba(255,255,255,.93)}
+  :root[data-theme="dark"] .pieza,:root[data-theme="dark"] .bloque,
+  :root[data-theme="dark"] .mini,:root[data-theme="dark"] .caso,
+  :root[data-theme="dark"] .doc,:root[data-theme="dark"] .paso{background:#1c2117}
+}
+
+@media print{
+  .ambiente,.barra,.progreso,.arriba,.indice{display:none!important}
+  body{background:#fff}
+  html.animar .rv{opacity:1!important;transform:none!important}
+  .pieza,.bloque,.mini,.caso,.tabla-wrap,.doc,.paso{
+    background:#fff;box-shadow:none;border:1px solid #ccc;
+    -webkit-backdrop-filter:none;backdrop-filter:none;break-inside:avoid;
+  }
+  .hoja{padding:0;gap:1.8rem;max-width:none}
+}
+
+@media (max-width:640px){
+  .paso{grid-template-columns:2.4rem 1fr;gap:.9rem;padding:1rem 1.05rem}
+  .paso .n{width:2.4rem;height:2.4rem;font-size:1rem}
+  .pieza,.bloque,.mini,.caso,.si-no>div{padding:1.2rem 1.25rem}
+}
+</style>
+</head>
+<body>
+
+<div class="ambiente" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="progreso" aria-hidden="true"></div>
+<header class="barra">
+  <span class="b-doc"><span>müva</span> · Reglas de triaje del chat</span>
+  <a href="/">← Documentos</a>
+</header>
+
+<div class="hoja">
+  <header>
+    <div class="marca">müva</div>
+    <p class="eyebrow" style="margin-top:.9rem">Revisión clínica</p>
+    <h1>Reglas de triaje del chat de agendamiento</h1>
+    <p class="fecha">Generado el 25 de julio de 2026 · MARKETEADOS para MÜVA PETS</p>
+  </header>
+
+  <section>
+    <p class="intro">Cuando una persona escribe por WhatsApp o Instagram contando qué le pasa a su mascota, el sistema lee ese texto y hace dos cosas: decide qué tan rápido hay que atender y arma la lista de qué debe alistar el veterinario antes de salir. También le dice al dueño qué puede preparar mientras tanto.</p>
+    <p class="descargo">Esto no es un diagnóstico y no reemplaza la valoración. Es preparación logística.</p>
+    <p class="pedido">Lo que necesitamos de ti: que marques lo que esté mal. Sobra algo, falta algo, un nivel de urgencia que no corresponde, una muestra que no se toma a domicilio, una recomendación al dueño que sea incorrecta. Cualquier corrección se aplica directo al sistema.</p>
+    <p class="nota"><b>Cómo leer las frases de ejemplo.</b> El sistema no busca la frase exacta, busca el fragmento. Un fragmento cortado como “ahogand” cubre “ahogando”, “ahogándose”, “se está ahogando”; “colaps” cubre “colapsó” y “colapsado”. Las barras son alternativas: “lengua morada/azul” significa que sirve cualquiera de las dos. No distingue mayúsculas ni tildes.</p>
+  </section>
+
+  <section class="parte">
+    <h2>Parte 1 · Casos que se mandan a urgencias, no a domicilio</h2>
+    <p>Si el mensaje contiene alguna de estas señales, el asistente no agenda una visita normal: le dice a la persona que lleve la mascota de inmediato a una clínica 24 horas, le explica por qué no da espera, y solo después ofrece coordinar el seguimiento a domicilio.</p>
+    <p class="aviso">Esta es la parte más delicada del sistema. Un caso que falte aquí es un caso que se va a quedar esperando una visita.</p>
+    
+      <article class="caso critico">
+        <h3>Dificultad respiratoria o mucosas alteradas</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>no puede respirar</li><li>dificultad para respirar</li><li>le cuesta respirar</li><li>se ahoga</li><li>ahogand</li><li>respira raro</li><li>respira rapido</li><li>agitado/a much</li><li>lengua morada/azul/violeta</li><li>encias moradas/azules/palidas/blancas</li><li>mucosas palidas</li><li>cianos</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Signos neurológicos (convulsión, colapso o alteración de la conciencia)</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>convulsion</li><li>convulsiona</li><li>ataque epilep</li><li>epilep</li><li>espasmos</li><li>temblando mucho</li><li>tembloroso</li><li>se desmay</li><li>desmayo</li><li>colaps</li><li>no responde</li><li>inconsciente</li><li>no reacciona</li><li>camina en circulo</li><li>perdio el equilibrio</li><li>cabeza torcida</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Trauma o sangrado activo</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>atropell</li><li>lo pisó</li><li>lo piso un carro</li><li>se cayo de</li><li>cayo del</li><li>caida de altura</li><li>le pego un carro</li><li>mordido por otro perro</li><li>pelea con otro perro</li><li>herida grande/abierta/profunda</li><li>sangra mucho</li><li>hemorragia</li><li>no para de sangrar</li><li>hueso afuera/expuesto</li><li>fractura</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Sospecha de intoxicación o reacción alérgica aguda</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>intoxic</li><li>envenen</li><li>comio veneno</li><li>raticida</li><li>rodenticida</li><li>se comio chocolate</li><li>xilitol</li><li>comio pastillas</li><li>se tomo</li><li>lamio cloro/desinfectante/anticongelante</li><li>mordio una serpiente</li><li>lo mordio una serpiente</li><li>picadura de serpiente/abeja/avispa</li><li>hinchada la cara</li><li>cara hinchada</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Posible obstrucción urinaria (en gatos machos es mortal en horas)</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>no puede orinar</li><li>no ha orinado</li><li>no orina</li><li>intentando orinar/hacer pipi y no</li><li>pujando para/por orinar</li><li>no hace pipi</li><li>no puede hacer pipi</li><li>orinar y no puede</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Abdomen distendido con arcadas improductivas (posible torsión gástrica)</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>abdomen hinchado/distendido/duro</li><li>barriga hinchada/dura/inflamada</li><li>estomago hinchado</li><li>arcadas sin vomitar</li><li>intenta vomitar y no puede</li><li>nausea sin vomit</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Parto complicado (distocia)</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>esta pariendo</li><li>en trabajo de parto</li><li>lleva horas pariendo</li><li>no puede parir</li><li>cachorro atorado</li><li>parto complicad</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Sospecha de golpe de calor</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>golpe de calor</li><li>se sobrecalento</li><li>quedo encerrado en el carro</li><li>jadea sin parar</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Urgencia oftalmológica o prolapso</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>ojo afuera/salido/se le salio</li><li>se le salio el ojo</li><li>prolapso</li></ul>
+      </article>
+      <article class="caso critico">
+        <h3>Sangrado digestivo activo</h3>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>vomit… con sangre</li><li>sangre en el vomito</li><li>heces negras</li><li>popo negro</li><li>diarrea con mucha sangre</li><li>sangre por el ano/la boca/la nariz</li></ul>
+      </article>
+  </section>
+
+  <section class="parte">
+    <h2>Parte 2 · Casos que sí se atienden a domicilio</h2>
+    <p>Para cada uno: qué tan rápido, qué alista el veterinario y qué prepara el dueño.</p>
+    
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Digestivo</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>vomit</li><li>guarcad</li><li>diarrea</li><li>deposicion blanda</li><li>heces blandas</li><li>popo blando</li><li>suelto del estomago</li><li>no hace bien del bano</li><li>parasitos</li><li>lombrices</li><li>gusanos en el popo</li><li>comio algo que no debia</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Coprológico directo + frotis (recoger muestra en sitio si el dueño no la tiene)</li><li>Prueba rápida de parvovirus/moquillo si es cachorro o no está vacunado</li><li>Hemograma y bioquímica básica (deshidratación y electrolitos)</li><li>Kit de fluidoterapia subcutánea + antiemético inyectable</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Si alcanza a recoger una muestra de popó fresca (de menos de 2 horas) en una bolsa o frasco limpio, sirve muchísimo</li><li>No le dé comida hasta que el veterinario lo revise; agua sí, en poquitos</li><li>Tenga a la mano el carné de vacunas y desparasitación</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Urinario</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>orina con sangre</li><li>sangre en la orina</li><li>orina mucho</li><li>toma mucha agua</li><li>se hace pipi en la casa</li><li>pipi con sangre</li><li>le arde al orinar</li><li>orina poquito</li><li>cistitis</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Uroanálisis + tirilla reactiva (cistocentesis si no hay muestra libre)</li><li>Frasco estéril para orina</li><li>Bioquímica renal (BUN, creatinina)</li><li>Ecógrafo portátil si está disponible (vejiga y riñones)</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Si logra recoger orina fresca en un frasco limpio y seco, guárdela refrigerada; si no, el veterinario la toma</li><li>No lo saque a orinar justo antes de la cita, para que llegue con vejiga</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Piel</h3>
+          <span class="pill media">Sin afán</span>
+        </div>
+        <p class="nivel-nota">Sin afán — en los próximos días</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>se rasca</li><li>rascando</li><li>comezon</li><li>picazon</li><li>alergia</li><li>caida de pelo</li><li>se le cae el pelo</li><li>pelado/a</li><li>caspa</li><li>granos</li><li>ronchas</li><li>costras</li><li>sarna</li><li>pulgas</li><li>garrapatas</li><li>hongos</li><li>piel roja</li><li>se lame mucho</li><li>se muerde las patas</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Raspado cutáneo profundo y superficial (láminas + aceite mineral)</li><li>Citología por impronta y cinta de acetato</li><li>Tricograma</li><li>Lámpara de Wood (descartar dermatofitos)</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>No lo bañe ni le aplique cremas, talcos o remedios caseros en las 48 horas antes de la visita: eso borra la muestra</li><li>Si le ha aplicado algún producto, tenga el empaque a la mano</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Oido</h3>
+          <span class="pill media">Sin afán</span>
+        </div>
+        <p class="nivel-nota">Sin afán — en los próximos días</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>oido</li><li>oreja</li><li>sacude la cabeza</li><li>se rasca la oreja</li><li>mal olor en/de la oreja/el oido</li><li>otitis</li><li>secrecion en el oido</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Citología ótica (hisopos + láminas)</li><li>Otoscopio con conos desechables</li><li>Solución de limpieza ótica</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>No le limpie los oídos antes de la visita: la muestra debe tomarse tal como está</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Ojos</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>ojo rojo/llorando/cerrado/nublado/opaco</li><li>lagrime</li><li>legañ</li><li>secrecion en el ojo</li><li>no abre el ojo</li><li>se golpeo el ojo</li><li>conjuntivitis</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Test de fluoresceína (descartar úlcera corneal)</li><li>Test de Schirmer</li><li>Colirio anestésico y solución salina estéril</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>No le aplique gotas ni colirios de otra mascota o de humanos antes de la revisión</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Respiratorio</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>tos</li><li>tosiendo</li><li>estornuda</li><li>mocos</li><li>gripa</li><li>moquillo</li><li>ronquera</li><li>silbid</li><li>traqueobronq</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Hemograma completo</li><li>Oxímetro de pulso y fonendo</li><li>Prueba rápida de moquillo si es cachorro o no está vacunado</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Anote hace cuántos días empezó la tos y si ha estado con otros perros o gatos</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Sistemico</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>decaid</li><li>triste</li><li>no come</li><li>no quiere comer</li><li>sin apetito</li><li>no se levanta</li><li>fiebre</li><li>caliente</li><li>adelgaz</li><li>perdio peso</li><li>debil</li><li>apatico</li><li>duerme todo el dia</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Hemograma completo + bioquímica (renal y hepática)</li><li>Prueba de hemoparásitos (ehrlichia / anaplasma / dirofilaria)</li><li>Tubos con EDTA y tubos secos, termómetro</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Si puede, no le dé comida las 8 horas previas (agua sí): permite tomar los exámenes de sangre en ayuno el mismo día</li><li>Tenga a la mano el carné de vacunas</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Locomotor</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>cojea</li><li>cojeando</li><li>no apoya</li><li>no camina bien</li><li>se le doblan las patas</li><li>dolor en la pata</li><li>se lastimo la pata</li><li>cadera</li><li>columna</li><li>arrastra las patas</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Examen ortopédico y neurológico completo</li><li>Analgesia inyectable</li><li>ADVERTENCIA: no hay radiografía a domicilio — si se sospecha fractura o hernia discal, hay que remitir a clínica</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Limite el movimiento: nada de escaleras, saltos ni paseos hasta la valoración</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Geriatrico</h3>
+          <span class="pill baja">Rutina</span>
+        </div>
+        <p class="nivel-nota">Rutina — se agenda con calma</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>viejit</li><li>geriatric</li><li>adulto mayor</li><li>tiene 10/-/9/2/-/90/-/9 anos</li><li>chequeo general</li><li>examen de sangre</li><li>perfil</li><li>control de rutina</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Perfil geriátrico: hemograma + bioquímica renal/hepática</li><li>Presión arterial</li><li>Tubos EDTA y secos</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Ayuno de 8 a 12 horas antes de la cita (agua sí), para el perfil de sangre</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Vacunacion</h3>
+          <span class="pill baja">Rutina</span>
+        </div>
+        <p class="nivel-nota">Rutina — se agenda con calma</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>vacun</li><li>refuerzo</li><li>rabia</li><li>polivalente</li><li>quintuple</li><li>sextuple</li><li>triple felina</li><li>carne de vacunas</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Biológicos según carné (verificar refuerzo pendiente antes de salir)</li><li>Carné de vacunación o uno nuevo</li><li>Nevera portátil con gel refrigerante (cadena de frío)</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Tenga el carné de vacunas a la mano</li><li>La mascota debe estar sana y desparasitada; si tiene síntomas, avísenos y lo revisamos primero</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Desparasitacion</h3>
+          <span class="pill baja">Rutina</span>
+        </div>
+        <p class="nivel-nota">Rutina — se agenda con calma</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>desparasit</li><li>antipulgas</li><li>pipeta</li><li>garrapaticida</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Antiparasitario interno y externo según peso</li><li>Báscula portátil</li></ul></div>
+        <div class="sub"><h4>Qué se le pide al dueño</h4><ul class="puntos"><li>Tenga a la mano el peso aproximado y la fecha de la última desparasitación</li></ul></div>
+      </article>
+      <article class="caso">
+        <div class="caso-cab">
+          <h3>Eutanasia</h3>
+          <span class="pill alta">Prioritaria</span>
+        </div>
+        <p class="nivel-nota">Prioritaria — hoy o mañana temprano</p>
+        <p class="disparador">Se activa cuando escriben algo como</p>
+        <ul class="frases"><li>eutanasia</li><li>dormirlo</li><li>sacrificar</li><li>despedida</li><li>ya no tiene calidad de vida</li></ul>
+        <div class="sub"><h4>Qué alista el veterinario</h4><ul class="puntos"><li>Protocolo de eutanasia humanitaria y consentimiento informado</li><li>Coordinar con el equipo antes de confirmar: requiere valoración previa</li></ul></div>
+        
+      </article>
+  </section>
+
+  <section class="parte">
+    <h2>Parte 3 · Reglas generales</h2>
+    <ul class="generales"><li>Si la persona dice que es <b>urgente</b> (“urgente”, “emergencia”, “se está muriendo”, “grave”), la urgencia <b>sube</b> a prioritaria. Nunca baja por eso.</li><li>Si el mensaje toca varios cuadros a la vez (por ejemplo vómito y decaimiento), se aplica <b>la urgencia más alta</b> y se suman las muestras de ambos.</li><li>Una señal de la Parte 1 manda a urgencias <b>sin importar</b> lo demás que diga el mensaje.</li><li>Las visitas se agendan solo entre <b>8:00 a.m. y 4:00 p.m.</b> Fuera de esa franja el sistema no deja agendar y propone otra hora.</li><li>El asistente <b>no diagnostica, no receta y no sugiere dosis ni remedios caseros</b>, ni siquiera si se lo piden. Si preguntan por medicamentos, responde que no le den nada hasta que lo vea el veterinario.</li></ul>
+  </section>
+
+  <p class="pie">
+    10 casos de urgencia · 12 cuadros de domicilio.
+    Este documento se genera automáticamente desde las reglas del sistema, así que siempre refleja
+    lo que el chat está haciendo hoy.
+  </p>
+</div>
+
+<button class="arriba" type="button" aria-label="Volver arriba">↑</button>
+
+<script>
+/* MÜVA PETS · microinteracciones del sitio de documentación
+   ---------------------------------------------------------------------
+   Sin librerías: IntersectionObserver y transformaciones CSS. Un
+   documento clínico no necesita un motor de animación de 90 KB, y así
+   abre igual de rápido en el celular del veterinario en la calle.
+
+   Dos reglas de las que no nos movemos:
+
+   1. El contenido nunca depende del JavaScript para ser visible. El CSS
+      solo esconde los bloques si este script alcanza a marcar
+      <html class="animar">, y aun así hay una red de seguridad que los
+      muestra todos si el observador no responde. Un manual en blanco
+      porque una animación no disparó es peor que no tener animación.
+
+   2. Nada depende de requestAnimationFrame. En pestañas en segundo
+      plano, con ahorro de batería o dentro de ciertos webviews, rAF se
+      congela: si el reveal colgara de él, el texto no aparecería nunca.
+      Se usa un acelerador con temporizadores, que se atrasa pero jamás
+      se queda trabado. */
+
+(function () {
+  'use strict';
+
+  var quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var puedeAnimar = !quieto && 'IntersectionObserver' in window;
+
+  /* ── 1. Aparición progresiva al hacer scroll ──────────────────────── */
+  function prepararReveals() {
+    if (!puedeAnimar) return;
+
+    var objetivos = document.querySelectorAll(
+      '.hoja > header, .hoja > section, .hoja > nav, .hoja > .docs > *, .hoja > .pie'
+    );
+
+    var piezas = [];
+    Array.prototype.forEach.call(objetivos, function (bloque) {
+      // Los bloques con varios hijos entran escalonados, para que la
+      // sección se lea como una unidad y no como diez cosas parpadeando.
+      var hijos = bloque.matches('.doc') ? [bloque] : Array.prototype.slice.call(bloque.children);
+      var grupo = hijos.length > 1 ? hijos : [bloque];
+      grupo.forEach(function (el, i) {
+        el.classList.add('rv');
+        el.style.transitionDelay = Math.min(i * 55, 330) + 'ms';
+        piezas.push(el);
+      });
+    });
+
+    if (!piezas.length) return;
+
+    // A partir de acá el CSS ya puede esconder: el script está vivo.
+    document.documentElement.classList.add('animar');
+
+    function revelar(el) {
+      el.classList.add('on');
+    }
+
+    var obs = new IntersectionObserver(
+      function (entradas) {
+        entradas.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          revelar(e.target);
+          obs.unobserve(e.target); // revelado una vez, revelado para siempre
+        });
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.05 }
+    );
+
+    piezas.forEach(function (el) { obs.observe(el); });
+
+    // Lo que ya está en pantalla no debe esperar a que el usuario mueva
+    // el dedo. Comprobación directa, sin rAF de por medio.
+    function revelarLoVisible() {
+      var alto = window.innerHeight || document.documentElement.clientHeight;
+      piezas.forEach(function (el) {
+        if (el.classList.contains('on')) return;
+        var caja = el.getBoundingClientRect();
+        if (caja.top < alto * 0.95 && caja.bottom > 0) revelar(el);
+      });
+    }
+    revelarLoVisible();
+    setTimeout(revelarLoVisible, 120);
+
+    // Segundo respaldo: por si el observador no entrega nada. Con esto
+    // basta con hacer scroll para que el contenido siga apareciendo.
+    var ultimo = 0;
+    window.addEventListener(
+      'scroll',
+      function () {
+        var ahora = Date.now();
+        if (ahora - ultimo < 100) return;
+        ultimo = ahora;
+        revelarLoVisible();
+      },
+      { passive: true }
+    );
+
+    // Interruptor de emergencia. No basta con preguntar si se marcaron
+    // piezas como reveladas: hay entornos donde la clase se aplica pero
+    // la transición nunca avanza (render congelado, compositor detenido),
+    // y el texto queda en opacidad 0 para siempre. Por eso se comprueba
+    // el resultado PINTADO. Si a los 2,5 s una pieza ya revelada sigue
+    // invisible, se quita "animar": desaparece la regla que esconde y el
+    // documento se ve sin depender de ninguna transición.
+    setTimeout(function () {
+      var muestra = document.querySelector('.rv.on');
+      if (!muestra || window.getComputedStyle(muestra).opacity === '0') {
+        document.documentElement.classList.remove('animar');
+      }
+    }, 2500);
+  }
+
+  /* ── 2. Barra de progreso, cabecera flotante y botón de volver ────── */
+  function prepararScroll() {
+    var progreso = document.querySelector('.progreso');
+    var barra = document.querySelector('.barra');
+    var arriba = document.querySelector('.arriba');
+    var ambiente = document.querySelectorAll('.ambiente i');
+
+    function alScroll() {
+      var y = window.scrollY || document.documentElement.scrollTop || 0;
+      var alto = document.documentElement.scrollHeight - window.innerHeight;
+      var razon = alto > 0 ? Math.min(1, Math.max(0, y / alto)) : 0;
+
+      if (progreso) progreso.style.transform = 'scaleX(' + razon + ')';
+      if (barra) barra.classList.toggle('on', y > 180);
+      if (arriba) arriba.classList.toggle('on', y > 600);
+
+      // Paralaje muy leve del fondo: da profundidad al cristal sin que
+      // se note que "algo se mueve".
+      if (!quieto) {
+        for (var i = 0; i < ambiente.length; i++) {
+          ambiente[i].style.transform = 'translate3d(0,' + y * (0.04 + i * 0.025) + 'px,0)';
+        }
+      }
+    }
+
+    // Acelerador por tiempo: se ejecuta de inmediato si pasaron más de
+    // 24 ms desde la última vez, y si no, agenda la última. Nunca se
+    // queda esperando un frame que puede no llegar.
+    var ultimo = 0;
+    var pendiente = null;
+    function pedir() {
+      var ahora = Date.now();
+      if (ahora - ultimo >= 24) {
+        ultimo = ahora;
+        alScroll();
+        return;
+      }
+      if (pendiente) return;
+      pendiente = setTimeout(function () {
+        pendiente = null;
+        ultimo = Date.now();
+        alScroll();
+      }, 24);
+    }
+
+    window.addEventListener('scroll', pedir, { passive: true });
+    window.addEventListener('resize', pedir, { passive: true });
+    alScroll();
+
+    if (arriba) {
+      arriba.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: quieto ? 'auto' : 'smooth' });
+      });
+    }
+  }
+
+  /* ── 3. Índice que marca en qué sección vas ───────────────────────── */
+  function prepararIndice() {
+    var enlaces = document.querySelectorAll('.indice a[href^="#"]');
+    if (!enlaces.length) return;
+
+    var porId = {};
+    var secciones = [];
+    Array.prototype.forEach.call(enlaces, function (a) {
+      var destino = document.getElementById(a.getAttribute('href').slice(1));
+      if (!destino) return;
+      porId[destino.id] = a;
+      secciones.push(destino);
+    });
+    if (!secciones.length) return;
+
+    function marcar(id) {
+      Array.prototype.forEach.call(enlaces, function (a) { a.classList.remove('activo'); });
+      if (porId[id]) porId[id].classList.add('activo');
+    }
+
+    if ('IntersectionObserver' in window) {
+      var obs = new IntersectionObserver(
+        function (entradas) {
+          entradas.forEach(function (e) {
+            if (e.isIntersecting) marcar(e.target.id);
+          });
+        },
+        // La franja alta marca la sección que estás leyendo, no la que
+        // apenas asoma por el borde inferior.
+        { rootMargin: '-15% 0px -70% 0px' }
+      );
+      secciones.forEach(function (s) { obs.observe(s); });
+    }
+
+    // Respaldo por scroll: cubre los navegadores donde el observador no
+    // entrega nada, y corrige el caso de dos secciones visibles a la vez.
+    var ultimo = 0;
+    window.addEventListener(
+      'scroll',
+      function () {
+        var ahora = Date.now();
+        if (ahora - ultimo < 120) return;
+        ultimo = ahora;
+        var corte = window.innerHeight * 0.25;
+        var actual = null;
+        secciones.forEach(function (s) {
+          if (s.getBoundingClientRect().top <= corte) actual = s.id;
+        });
+        if (actual) marcar(actual);
+      },
+      { passive: true }
+    );
+  }
+
+  function iniciar() {
+    // Si una parte falla, las otras dos siguen funcionando.
+    try { prepararReveals(); } catch (e) { document.documentElement.classList.remove('animar'); }
+    try { prepararScroll(); } catch (e) {}
+    try { prepararIndice(); } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciar);
+  } else {
+    iniciar();
+  }
+})();
+</script>
+</body>
+</html>

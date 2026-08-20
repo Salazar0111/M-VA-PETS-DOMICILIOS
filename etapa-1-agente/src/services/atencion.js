@@ -14,11 +14,13 @@ const { evaluarSintomas, resumirPreparacion } = require('./triage');
 const { crearCita, actualizarEventoVeterinario, obtenerContextoCliente } = require('./supabase');
 const { crearEventoVeterinario } = require('./calendar');
 const { interpretarFechaHora } = require('./interpretarFecha');
+const { calcularRutaDelDia, fechaISODeMañana } = require('../jobs/calcularRutaDelDia');
 
 const ESPERA_AGRUPACION_MS = 2500;   // cuánto se espera por si sigue escribiendo
 const PAUSA_ENTRE_GLOBOS_MS = 1400;  // ritmo entre mensajes seguidos
 const HORA_APERTURA = 8;
 const HORA_CIERRE = 16;
+const HORA_JOB_NOCTURNO = 20; // el cron de rutas de index.js corre a las 8:00 p.m.
 
 // Mensajes que llegaron y aún no se procesan, por contacto.
 const pendientes = new Map();
@@ -143,6 +145,8 @@ async function agendarCita(canal, contactoId, entrada) {
     `[Atención] Cita ${cita.id} agendada (${canal}) — urgencia ${evaluacion.nivel} — ${horaLegible(fechaHoraConfirmada)}`
   );
 
+  reordenarRutaSiHaceFalta(fechaHoraConfirmada);
+
   return {
     ok: true,
     quedo_agendada_para: horaLegible(fechaHoraConfirmada),
@@ -153,6 +157,43 @@ async function agendarCita(canal, contactoId, entrada) {
     nivel_urgencia: evaluacion.nivel,
     nota: 'Cuéntaselo con tus palabras, en corto. No repitas esta información como lista.',
   };
+}
+
+// Una urgencia que entra a media mañana no sirve de nada si el veterinario
+// la ve al final de la lista: hay que reordenar la ruta que ya está en
+// curso. El job nocturno corre a las 8:00 p.m. y solo arma la de mañana,
+// así que estos dos casos quedaban fuera:
+//
+//   · la cita es para HOY (la ruta del día ya estaba calculada);
+//   · la cita es para MAÑANA pero entró después de las 8:00 p.m., o sea
+//     cuando el job de esta noche ya pasó.
+//
+// Se dispara sin await a propósito: el cliente no puede quedarse esperando
+// en el chat a que Google Directions conteste, y si el recálculo falla, la
+// cita ya quedó guardada igual — solo se pierde el orden óptimo.
+// La decisión va aparte y sin depender del reloj para poder probar las
+// cuatro ramas; si dependiera de la hora real, la mitad de los casos solo
+// se podrían verificar de noche.
+function debeReordenar({ fechaCita, hoy, manana, horaActual }) {
+  if (fechaCita === hoy) return true;
+  if (fechaCita === manana && horaActual >= HORA_JOB_NOCTURNO) return true;
+  return false;
+}
+
+function reordenarRutaSiHaceFalta(fechaHoraConfirmada) {
+  const fechaCita = new Date(fechaHoraConfirmada).toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+  const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+  const horaActual = Number(
+    new Date().toLocaleString('en-US', { timeZone: 'America/Bogota', hour: '2-digit', hour12: false })
+  );
+
+  if (!debeReordenar({ fechaCita, hoy, manana: fechaISODeMañana(), horaActual })) return;
+
+  calcularRutaDelDia(fechaCita)
+    .then((r) => {
+      if (r) console.log(`[Atención] Ruta de ${fechaCita} reordenada tras agendar (${r.totalKm.toFixed(1)} km)`);
+    })
+    .catch((err) => console.error(`[Atención] No se pudo reordenar la ruta de ${fechaCita}:`, err.message));
 }
 
 // ---------------------------------------------------------------------------
@@ -232,4 +273,4 @@ async function procesar(id) {
   }
 }
 
-module.exports = { recibirMensaje };
+module.exports = { recibirMensaje, debeReordenar };

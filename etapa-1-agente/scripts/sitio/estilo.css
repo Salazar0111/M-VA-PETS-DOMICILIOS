@@ -1,0 +1,446 @@
+/* MÜVA PETS · sistema visual del sitio de documentación
+   ---------------------------------------------------------------------
+   Un solo archivo para los tres documentos. Los HTML de origen solo
+   aportan estructura y nombres de clase; todo lo visual vive acá, así un
+   cambio de diseño no hay que repetirlo tres veces (y el de triaje, que
+   se genera por script, no queda desfasado).
+
+   La estética es "cristal": paneles traslúcidos con desenfoque sobre un
+   fondo con lavados de color de la marca. Se apoya en la paleta del
+   manual de MÜVA — bosque, salvia, terracota, camel, crema — no en un
+   gris genérico.                                                        */
+
+/* ─────────────────────────── tokens ─────────────────────────── */
+
+:root{
+  color-scheme: light dark;
+
+  --bosque:#303926; --salvia:#76836a; --terra:#be7c60; --camel:#bb9a7f;
+  --crema:#e7dfd3;
+
+  --fondo:#f7f3ec;
+  --tinta:#232817;
+  --tinta-2:#4a5140;
+  --tenue:#7d7768;
+
+  /* Cristal: relleno + borde + luz superior + sombra proyectada. Los
+     cuatro juntos son los que dan el volumen; con uno solo se ve plano. */
+  --vidrio:rgba(255,255,255,.58);
+  --vidrio-fuerte:rgba(255,255,255,.78);
+  --vidrio-borde:rgba(255,255,255,.85);
+  --vidrio-luz:inset 0 1px 0 rgba(255,255,255,.9);
+  --vidrio-sombra:0 1px 2px rgba(48,57,38,.04), 0 20px 44px -28px rgba(48,57,38,.5);
+  --vidrio-sombra-alta:0 2px 4px rgba(48,57,38,.05), 0 30px 60px -30px rgba(48,57,38,.55);
+  --desenfoque:blur(20px) saturate(155%);
+
+  --linea:rgba(48,57,38,.12);
+  --linea-suave:rgba(48,57,38,.07);
+
+  --ok:#4f6b3f;      --ok-fondo:rgba(118,131,106,.16);
+  --espera:#8a6b46;  --espera-fondo:rgba(187,154,127,.26);
+  --ojo:#a3542f;     --ojo-fondo:rgba(190,124,96,.18);
+  --alarma:#98351c;  --alarma-fondo:rgba(154,59,34,.09);
+
+  --display:'Fraunces',Georgia,'Times New Roman',serif;
+  --ui:'Jost',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --ancho:46rem;
+  --curva:1.1rem;
+  --curva-sm:.65rem;
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fondo:#12160f;
+    --tinta:#e9e4d8; --tinta-2:#c3bfb0; --tenue:#948e7f;
+    --bosque:#dfe6d3; --salvia:#9aa78d;
+    --vidrio:rgba(255,255,255,.055);
+    --vidrio-fuerte:rgba(255,255,255,.085);
+    --vidrio-borde:rgba(255,255,255,.13);
+    --vidrio-luz:inset 0 1px 0 rgba(255,255,255,.09);
+    --vidrio-sombra:0 1px 2px rgba(0,0,0,.3), 0 22px 48px -30px rgba(0,0,0,.8);
+    --vidrio-sombra-alta:0 2px 6px rgba(0,0,0,.35), 0 34px 66px -32px rgba(0,0,0,.85);
+    --linea:rgba(233,228,216,.14); --linea-suave:rgba(233,228,216,.08);
+    --ok:#a8c191; --ok-fondo:rgba(163,187,142,.15);
+    --espera:#d3b795; --espera-fondo:rgba(205,177,147,.15);
+    --ojo:#e0a184; --ojo-fondo:rgba(221,161,132,.15);
+    --alarma:#ef8f74; --alarma-fondo:rgba(232,132,106,.13);
+  }
+}
+:root[data-theme="dark"]{
+  --fondo:#12160f;
+  --tinta:#e9e4d8; --tinta-2:#c3bfb0; --tenue:#948e7f;
+  --bosque:#dfe6d3; --salvia:#9aa78d;
+  --vidrio:rgba(255,255,255,.055);
+  --vidrio-fuerte:rgba(255,255,255,.085);
+  --vidrio-borde:rgba(255,255,255,.13);
+  --vidrio-luz:inset 0 1px 0 rgba(255,255,255,.09);
+  --vidrio-sombra:0 1px 2px rgba(0,0,0,.3), 0 22px 48px -30px rgba(0,0,0,.8);
+  --vidrio-sombra-alta:0 2px 6px rgba(0,0,0,.35), 0 34px 66px -32px rgba(0,0,0,.85);
+  --linea:rgba(233,228,216,.14); --linea-suave:rgba(233,228,216,.08);
+  --ok:#a8c191; --ok-fondo:rgba(163,187,142,.15);
+  --espera:#d3b795; --espera-fondo:rgba(205,177,147,.15);
+  --ojo:#e0a184; --ojo-fondo:rgba(221,161,132,.15);
+  --alarma:#ef8f74; --alarma-fondo:rgba(232,132,106,.13);
+}
+
+/* ─────────────────────────── base ─────────────────────────── */
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+img,svg{max-width:100%;height:auto;display:block}
+
+body{
+  background:var(--fondo);
+  color:var(--tinta);
+  font-family:var(--ui);
+  font-size:1.03rem;
+  line-height:1.72;
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+  overflow-x:hidden;
+}
+
+/* Lavados de color detrás del cristal. Sin esto el desenfoque no tiene
+   nada que desenfocar y los paneles se ven como cajas blancas. */
+.ambiente{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.ambiente i{
+  position:absolute;display:block;border-radius:50%;
+  filter:blur(90px);opacity:.5;
+  will-change:transform;
+}
+.ambiente i:nth-child(1){width:46vw;height:46vw;top:-8vw;left:-10vw;background:rgba(118,131,106,.5)}
+.ambiente i:nth-child(2){width:40vw;height:40vw;top:32vh;right:-14vw;background:rgba(190,124,96,.42)}
+.ambiente i:nth-child(3){width:38vw;height:38vw;bottom:-12vw;left:18vw;background:rgba(187,154,127,.42)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .ambiente i{opacity:.26;filter:blur(110px)}
+}
+:root[data-theme="dark"] .ambiente i{opacity:.26;filter:blur(110px)}
+
+/* ─────────────────────── barra de lectura ─────────────────────── */
+
+.progreso{
+  position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;
+  transform:scaleX(0);z-index:60;
+  background:linear-gradient(90deg,var(--salvia),var(--terra));
+}
+
+/* Cabecera flotante: aparece cuando ya pasaste el título. */
+.barra{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.7rem clamp(1rem,4vw,2rem);
+  background:var(--vidrio-fuerte);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  border-bottom:1px solid transparent;
+  opacity:0;transform:translateY(-100%);
+  transition:opacity .3s ease,transform .3s ease,border-color .3s ease;
+}
+.barra.on{opacity:1;transform:translateY(0);border-bottom-color:var(--linea)}
+.barra .b-doc{font-family:var(--display);font-weight:600;font-size:1rem;color:var(--bosque);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barra .b-doc span{color:var(--terra)}
+.barra a{
+  font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--tinta-2);text-decoration:none;white-space:nowrap;
+  padding:.45rem .8rem;border-radius:100px;border:1px solid var(--linea);
+  transition:color .2s,border-color .2s,background .2s;
+}
+.barra a:hover{color:var(--terra);border-color:var(--terra);background:var(--ojo-fondo)}
+
+/* ─────────────────────────── hoja ─────────────────────────── */
+
+.hoja{
+  max-width:var(--ancho);margin:0 auto;
+  padding:clamp(3rem,9vw,6rem) clamp(1.15rem,4vw,2rem) 7rem;
+  display:flex;flex-direction:column;gap:clamp(2.75rem,6vw,4rem);
+}
+
+.marca{
+  font-family:var(--display);font-weight:600;font-size:2rem;color:var(--bosque);
+  line-height:1;letter-spacing:-.01em;
+}
+.eyebrow{
+  font-size:.74rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--terra);margin-top:1.1rem;
+}
+
+/* "Letra bond más grande": el h1 es el ancla visual de cada documento. */
+h1{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(2.5rem,7.5vw,4.4rem);
+  color:var(--bosque);line-height:.98;letter-spacing:-.035em;
+  text-wrap:balance;margin:.85rem 0 .9rem;
+}
+h2{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(1.75rem,4.6vw,2.7rem);
+  color:var(--bosque);line-height:1.06;letter-spacing:-.025em;text-wrap:balance;
+}
+h3{
+  font-family:var(--display);font-weight:600;font-size:clamp(1.2rem,2.6vw,1.5rem);
+  color:var(--bosque);line-height:1.2;letter-spacing:-.015em;margin-top:.5rem;
+}
+h4{
+  font-size:.72rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--tenue);
+}
+b{font-weight:700;color:var(--bosque)}
+i{font-style:italic}
+
+.bajada,.intro{font-size:clamp(1.06rem,2.1vw,1.22rem);line-height:1.6;color:var(--tinta-2);max-width:36rem}
+.descargo{font-weight:700;color:var(--bosque);font-size:1.06rem}
+.fecha,.meta-doc{
+  font-size:.87rem;color:var(--tenue);margin-top:1.5rem;
+  border-top:1px solid var(--linea-suave);padding-top:1.05rem;
+}
+
+section{display:flex;flex-direction:column;gap:1.15rem;scroll-margin-top:5rem}
+section>p,.bloque>p{font-size:1.02rem}
+
+/* Título de sección: la línea corta en terracota reemplaza al filete
+   grueso; pesa menos y ordena igual. */
+.parte{padding-top:1.6rem;position:relative}
+.parte::before{
+  content:'';position:absolute;top:0;left:0;width:3rem;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--terra),var(--camel));
+}
+
+/* ─────────────────────── superficie de cristal ─────────────────────── */
+
+.pieza,.bloque,.mini,.caso,.tabla-wrap,.indice,.cierre,.nota,.alerta,
+.si-no>div,.doc{
+  background:var(--vidrio);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  border:1px solid var(--vidrio-borde);
+  border-radius:var(--curva);
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra);
+}
+
+.pieza,.bloque,.mini,.caso,.si-no>div{padding:1.4rem 1.5rem;display:flex;flex-direction:column;gap:.65rem}
+.indice,.cierre{padding:1.4rem 1.55rem}
+.nota,.alerta{padding:1.15rem 1.35rem}
+
+/* Reveal de hairline en el borde superior al pasar el mouse: la única
+   animación de hover, y solo en lo que es tarjeta. */
+.pieza,.mini,.caso,.doc{position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.25,1),box-shadow .35s,border-color .35s}
+.pieza::after,.mini::after,.caso::after,.doc::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--terra),var(--camel));
+  transform:scaleX(0);transform-origin:left;transition:transform .45s cubic-bezier(.2,.8,.25,1);
+}
+.pieza:hover,.mini:hover,.caso:hover,.doc:hover{
+  transform:translateY(-3px);box-shadow:var(--vidrio-luz),var(--vidrio-sombra-alta);
+  border-color:rgba(190,124,96,.4);
+}
+.pieza:hover::after,.mini:hover::after,.caso:hover::after,.doc:hover::after{transform:scaleX(1)}
+
+/* ─────────────────────────── portada ─────────────────────────── */
+
+.docs{display:flex;flex-direction:column;gap:1rem}
+.doc{padding:1.6rem 1.7rem;text-decoration:none;color:inherit;gap:.5rem}
+.doc .para{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--terra)}
+.doc h2{font-size:clamp(1.45rem,3.4vw,1.9rem)}
+.doc p{font-size:1rem;color:var(--tinta-2)}
+.doc .ir{font-size:.86rem;font-weight:600;color:var(--salvia);margin-top:.3rem;
+  display:inline-flex;align-items:center;gap:.4rem;transition:gap .3s,color .3s}
+.doc:hover .ir{gap:.75rem;color:var(--terra)}
+.doc:focus-visible{outline:2px solid var(--terra);outline-offset:3px}
+
+/* ────────────────────── presentación de entrega ────────────────────── */
+
+.piezas{display:grid;grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr));gap:1rem}
+.pieza .quien{font-size:.68rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;color:var(--terra)}
+.pieza p{font-size:.97rem;color:var(--tinta-2)}
+
+/* El recorrido es una secuencia real; por eso va numerado. */
+.flujo{display:flex;flex-direction:column;gap:.55rem;counter-reset:paso}
+.paso{
+  display:grid;grid-template-columns:2.9rem 1fr;gap:1.1rem;align-items:start;
+  padding:1.15rem 1.3rem;border-radius:var(--curva-sm);
+  background:var(--vidrio);border:1px solid var(--vidrio-borde);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  box-shadow:var(--vidrio-luz);
+  transition:border-color .35s,transform .35s cubic-bezier(.2,.8,.25,1);
+}
+.paso:hover{border-color:rgba(190,124,96,.4);transform:translateX(4px)}
+.paso .n{
+  counter-increment:paso;width:2.9rem;height:2.9rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:700;font-size:1.15rem;color:var(--terra);
+  background:var(--ojo-fondo);border:1px solid rgba(190,124,96,.32);
+}
+.paso .n::before{content:counter(paso)}
+.paso h4{font-family:var(--ui);font-size:1.04rem;font-weight:700;letter-spacing:0;
+  text-transform:none;color:var(--bosque);margin-bottom:.2rem}
+.paso p{font-size:.97rem;color:var(--tinta-2)}
+.paso .quien-min{font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--salvia);margin-top:.5rem}
+
+.cierre{border-left:3px solid var(--terra);font-size:1.02rem}
+
+/* ─────────────────────────── tablas ─────────────────────────── */
+
+.tabla-wrap{overflow-x:auto;padding:0}
+table{border-collapse:collapse;width:100%;font-size:.96rem;min-width:31rem}
+th,td{text-align:left;padding:.9rem 1.05rem;border-bottom:1px solid var(--linea-suave);vertical-align:top}
+th{font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--tenue);
+   background:var(--vidrio-fuerte)}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .25s}
+tbody tr:hover{background:var(--ojo-fondo)}
+td.mod{font-weight:700;color:var(--bosque)}
+
+/* Estados y niveles: la forma comunica tanto como el texto. */
+.est,.pill{
+  display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;padding:.32rem .68rem;border-radius:100px;white-space:nowrap;
+  border:1px solid transparent;
+}
+.est.ok{background:var(--ok-fondo);color:var(--ok);border-color:rgba(118,131,106,.3)}
+.est.pend,.pill.media{background:var(--espera-fondo);color:var(--espera);border-color:rgba(187,154,127,.4)}
+.est.ojo,.pill.alta{background:var(--ojo-fondo);color:var(--ojo);border-color:rgba(190,124,96,.35)}
+.pill.baja{background:var(--ok-fondo);color:var(--ok);border-color:rgba(118,131,106,.3)}
+
+/* ─────────────────────────── listas ─────────────────────────── */
+
+ul.limpia,ul.puntos,ul.generales{padding-left:1.15rem;display:flex;flex-direction:column;gap:.6rem;font-size:1rem}
+ol.pasos{padding-left:1.3rem;display:flex;flex-direction:column;gap:.7rem;font-size:1rem}
+ul.limpia li::marker,ul.puntos li::marker,ul.generales li::marker{color:var(--camel)}
+ol.pasos li::marker{color:var(--terra);font-weight:700}
+li{padding-left:.15rem}
+
+.dl{display:grid;grid-template-columns:auto 1fr;gap:.6rem 1.2rem;font-size:.98rem;align-items:baseline}
+.dl dt{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);white-space:nowrap}
+code{
+  font-family:var(--mono);font-size:.86em;
+  background:var(--vidrio-fuerte);border:1px solid var(--linea-suave);
+  border-radius:.35rem;padding:.15rem .4rem;word-break:break-all;
+}
+
+/* ───────────────────── llamados y avisos ───────────────────── */
+
+.nota{border-left:3px solid var(--camel);font-size:.99rem;color:var(--tinta-2)}
+.nota b{color:var(--bosque)}
+.alerta{border-left:3px solid var(--alarma);background:var(--alarma-fondo);font-size:1rem}
+.alerta b{color:var(--alarma)}
+.aviso{color:var(--alarma);font-weight:700}
+.pedido{
+  background:var(--vidrio);border:1px solid var(--vidrio-borde);border-left:3px solid var(--terra);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  border-radius:var(--curva);padding:1.2rem 1.4rem;font-size:1.02rem;
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra);
+}
+
+.duo,.si-no{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem}
+.mini p{font-size:.96rem;color:var(--tinta-2)}
+.si-no ul{margin-top:.15rem}
+
+/* ─────────────────── índice del manual (pegajoso) ─────────────────── */
+
+.indice h2{font-family:var(--ui);font-size:.72rem;font-weight:700;letter-spacing:.17em;
+  text-transform:uppercase;color:var(--tenue);margin-bottom:.9rem;letter-spacing:.17em}
+.indice ol{padding-left:0;list-style:none;counter-reset:idx;display:flex;flex-direction:column;gap:.15rem}
+.indice li{counter-increment:idx}
+.indice a{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.5rem .7rem;border-radius:.5rem;
+  color:var(--tinta-2);text-decoration:none;font-size:.98rem;font-weight:500;
+  transition:background .25s,color .25s;
+}
+.indice a::before{
+  content:counter(idx);flex:none;width:1.5rem;height:1.5rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;color:var(--salvia);
+  background:var(--ok-fondo);transition:background .25s,color .25s;
+}
+.indice a:hover{background:var(--ojo-fondo);color:var(--bosque)}
+.indice a.activo{background:var(--ojo-fondo);color:var(--bosque);font-weight:700}
+.indice a.activo::before{background:var(--terra);color:#fff}
+
+/* ─────────────────────────── triaje ─────────────────────────── */
+
+.caso.critico{border-left:3px solid var(--alarma);background:var(--alarma-fondo)}
+.caso-cab{display:flex;align-items:center;justify-content:space-between;gap:.85rem;flex-wrap:wrap}
+.nivel-nota{font-size:.9rem;color:var(--tenue);margin-top:-.35rem}
+.disparador{font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tenue)}
+.frases{list-style:none;display:flex;flex-wrap:wrap;gap:.45rem;padding:0}
+.frases li{
+  font-size:.92rem;padding:.3rem .68rem;border-radius:.45rem;
+  background:var(--vidrio-fuerte);border:1px solid var(--linea-suave);
+  color:var(--tinta);transition:border-color .25s,transform .25s;
+}
+.frases li:hover{border-color:rgba(190,124,96,.45);transform:translateY(-1px)}
+.sub{border-top:1px solid var(--linea-suave);padding-top:1rem;margin-top:.2rem}
+
+/* ─────────────────────────── pie ─────────────────────────── */
+
+.pie{font-size:.87rem;color:var(--tenue);border-top:1px solid var(--linea-suave);padding-top:1.4rem}
+
+/* ─────────────────────── volver arriba ─────────────────────── */
+
+.arriba{
+  position:fixed;right:clamp(1rem,3vw,2rem);bottom:clamp(1rem,3vw,2rem);z-index:55;
+  width:2.9rem;height:2.9rem;border-radius:50%;border:1px solid var(--vidrio-borde);
+  background:var(--vidrio-fuerte);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra);
+  color:var(--bosque);font-size:1.05rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(12px) scale(.9);pointer-events:none;
+  transition:opacity .3s,transform .3s cubic-bezier(.2,.8,.25,1),border-color .25s,color .25s;
+}
+.arriba.on{opacity:1;transform:none;pointer-events:auto}
+.arriba:hover{border-color:var(--terra);color:var(--terra)}
+
+/* ─────────────────── microinteracción de scroll ─────────────────── */
+
+/* El contenido NUNCA se oculta por CSS solo: se oculta únicamente si el
+   JavaScript alcanzó a marcar <html class="animar">. Si el script no
+   corre, si falla, o si el navegador congela los temporizadores, el
+   documento se ve completo igual. Un manual invisible por una animación
+   que no disparó es una falla peor que no tener animación. */
+.rv{transition:opacity .7s cubic-bezier(.2,.8,.25,1),transform .7s cubic-bezier(.2,.8,.25,1)}
+html.animar .rv{opacity:0;transform:translateY(26px)}
+html.animar .rv.on{opacity:1;transform:none}
+
+:focus-visible{outline:2px solid var(--terra);outline-offset:3px;border-radius:.35rem}
+
+/* ─────────────────────────── respeto ─────────────────────────── */
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.animar .rv{opacity:1;transform:none}
+  .ambiente i{filter:blur(90px)}
+}
+
+/* El desenfoque de fondo es caro en móviles viejos; si el navegador no
+   lo soporta, se compensa con un relleno más opaco para no perder
+   contraste ni legibilidad. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .pieza,.bloque,.mini,.caso,.tabla-wrap,.indice,.cierre,.nota,.alerta,
+  .si-no>div,.doc,.paso,.barra,.arriba,.pedido{background:rgba(255,255,255,.93)}
+  :root[data-theme="dark"] .pieza,:root[data-theme="dark"] .bloque,
+  :root[data-theme="dark"] .mini,:root[data-theme="dark"] .caso,
+  :root[data-theme="dark"] .doc,:root[data-theme="dark"] .paso{background:#1c2117}
+}
+
+@media print{
+  .ambiente,.barra,.progreso,.arriba,.indice{display:none!important}
+  body{background:#fff}
+  html.animar .rv{opacity:1!important;transform:none!important}
+  .pieza,.bloque,.mini,.caso,.tabla-wrap,.doc,.paso{
+    background:#fff;box-shadow:none;border:1px solid #ccc;
+    -webkit-backdrop-filter:none;backdrop-filter:none;break-inside:avoid;
+  }
+  .hoja{padding:0;gap:1.8rem;max-width:none}
+}
+
+@media (max-width:640px){
+  .paso{grid-template-columns:2.4rem 1fr;gap:.9rem;padding:1rem 1.05rem}
+  .paso .n{width:2.4rem;height:2.4rem;font-size:1rem}
+  .pieza,.bloque,.mini,.caso,.si-no>div{padding:1.2rem 1.25rem}
+}

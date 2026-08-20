@@ -188,6 +188,44 @@ cd ../muva-pets-docs && vercel deploy --prod --yes
 
 **Pendiente de verificación real:** el motor de rutas nunca se ha visto correr con una jornada real. Se puede forzar con `GET /rutas/calcular/:fecha` (rol admin) y mirar los logs de Railway.
 
+## 14. El token de Google caduca — leer antes de diagnosticar nada de Calendar
+
+**2026-08-19.** Primera prueba en vivo con un cliente: el agente conversó bien,
+pero al confirmar la cita respondió "tuvimos un problema técnico al guardar" y
+—peor— le dijo al cliente que sus datos **ya habían quedado guardados**. No se
+guardó nada.
+
+**Causa raíz:** `GOOGLE_REFRESH_TOKEN` vencido. Google responde `invalid_grant`.
+Casi con certeza porque la pantalla de consentimiento OAuth está en modo
+**Testing**, donde Google caduca los refresh tokens **a los 7 días**. Encaja con
+que funcionara el 25 de julio y no el 19 de agosto.
+
+**Por qué costó la cita completa:** `agendarCita()` llamaba a Google Calendar
+ANTES de guardar en Supabase. El token muerto reventaba el primer paso y la cita
+no llegaba a existir. **Corregido:** ahora se guarda primero en Supabase (sistema
+de registro) y Calendar es una copia; si Calendar falla, la cita queda igual y el
+fallo se registra con ⚠ en los logs.
+
+**Este fallo es SILENCIOSO.** Las citas siguen entrando, el veterinario las ve,
+pero dejan de aparecer en el calendario de MÜVA y nadie se entera. Antes de
+cualquier demo o entrega:
+
+```bash
+node scripts/probar-token-google.js     # 2 segundos, dice si el token vive
+node scripts/renovar-token-google.js    # lo rehace y lo guarda en .env
+```
+
+Para que deje de pasar hay que **publicar la app OAuth** ("In production") en
+Google Cloud Console. Renovar el token sin publicar la app solo compra 7 días.
+
+`scripts/diagnosticar.js` reproduce el guardado contra los servicios reales, paso
+por paso, y limpia lo que crea.
+
+**Nota de entorno:** el proyecto vive en el Escritorio, que está sincronizado en
+la nube, y ahí `require('googleapis')` tarda **minutos** en cargar. Por eso los
+scripts de token hablan con Google por HTTPS directo y los tests sustituyen
+`calendar.js`. Si algo parece colgado, es esto.
+
 ## 12. Próximo paso
 
 Terminar de desplegar la Etapa 8 (sección 13): correr la migración SQL, setear las variables nuevas en Railway y probar por WhatsApp con el número de prueba.

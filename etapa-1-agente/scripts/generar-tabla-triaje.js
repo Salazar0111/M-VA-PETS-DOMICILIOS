@@ -323,6 +323,13 @@ function generarHTML() {
     <p class="intro">${esc(INTRO)}</p>
     <p class="descargo">${esc(DESCARGO)}</p>
     <p class="pedido">${esc(PEDIDO)}</p>
+    <a class="descarga" href="/triaje.docx" download>
+      <span class="descarga-ic" aria-hidden="true">↓</span>
+      <span class="descarga-t">
+        <b>Descargar en Word para editarlo</b>
+        <small>Trae una línea de observaciones bajo cada caso. Tache, agregue o corrija directamente en el archivo.</small>
+      </span>
+    </a>
     <p class="nota"><b>Cómo leer las frases de ejemplo.</b> ${esc(COMO_LEER)}</p>
   </section>
 

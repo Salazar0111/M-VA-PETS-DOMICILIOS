@@ -39,14 +39,14 @@
 | Etapa | Estado |
 |---|---|
 | 1. Agente de captación (WhatsApp) | ✅ En producción, número real **+57 305 4500349** registrado en Meta |
-| 1b. Instagram | ⏳ Código listo (`src/webhooks/instagram.js`), falta conectarlo en Meta for Developers (necesita acceso admin a la cuenta de IG de MÜVA — pendiente del cliente) |
+| 1b. Instagram | ❌ **Descartado por el usuario el 2026-08-19.** El código sigue en el repo y funciona, pero no se conecta ni se ofrece. Ver sección 11b. |
 | 2. Supabase + Google Calendar | ✅ Funcionando. Autorizado temporalmente con el Gmail de MÜVA (`resultadosmuva@gmail.com`) mientras llega el correo del veterinario real |
-| 3. Motor de rutas | ⚠️ Desbloqueado el 2026-07-25 (`VETERINARIO_DIRECCION_BASE` ya está en Railway), pero **aún no se ha visto correr con datos reales**: el cron nocturno tiene que ejecutarse con citas confirmadas del día siguiente. Verificar en los logs. |
+| 3. Motor de rutas | ⚠️ Desbloqueado el 2026-08-19 (`VETERINARIO_DIRECCION_BASE` ya está en Railway), pero **aún no se ha visto correr con datos reales**: el cron nocturno tiene que ejecutarse con citas confirmadas del día siguiente. Verificar en los logs. |
 | 4. App del veterinario (PWA) | ✅ En producción en `/app/`, probada end-to-end |
 | 5. Panel de operación MÜVA | ✅ En producción en `/panel/`, incluye Informes con filtro de rango y exportación a Excel/CSV |
 | 6. Autenticación | ✅ Supabase Auth, login mediado por backend |
 | 7. Historial de clientes/mascotas | ✅ Implementado y probado (ver sección 6) |
-| 8. Agente conversacional + triaje | ✅ Código listo, **falta correr la migración SQL y desplegar** (ver sección 13) |
+| 8. Agente conversacional + triaje | ✅ En producción desde el 2026-08-19: migración aplicada, desplegado y verificado (ver sección 13) |
 | Identidad visual | ✅ Manual de marca recibido y aplicado (ver sección 8) |
 
 ## 4. Esquema de Supabase (tabla por tabla)
@@ -103,9 +103,9 @@ POST {SUPABASE_URL}/auth/v1/verify
 
 ## 7. Pendientes que dependen del cliente
 
-1. ~~**Correo Gmail real del veterinario**~~ → **DESCARTADO 2026-07-25, no volver a pedirlo.** Decisión del usuario: los eventos deben quedar en el Google Calendar de MÜVA (`resultadosmuva@gmail.com`), que es lo que ya pasa. El veterinario no necesita el calendario porque tiene la PWA `/app/` con la ruta del día y el briefing clínico. `GOOGLE_CALENDAR_ID_VETERINARIO` se queda **sin setear** a propósito: así usa `'primary'` del correo autorizado, que es el de MÜVA. El nombre de la variable y de `crearEventoVeterinario()` quedó heredado del diseño original — apuntan al calendario de MÜVA, no al del veterinario.
-2. ~~**`VETERINARIO_DIRECCION_BASE`**~~ → **`Calle 142 #19a-27, Bogotá`**, ya configurada en Railway el 2026-07-25. Etapa 3 desbloqueada.
-3. **Acceso admin a Instagram de MÜVA** — para conectar el webhook de IG en Meta for Developers (código ya listo).
+1. ~~**Correo Gmail real del veterinario**~~ → **DESCARTADO 2026-08-19, no volver a pedirlo.** Decisión del usuario: los eventos deben quedar en el Google Calendar de MÜVA (`resultadosmuva@gmail.com`), que es lo que ya pasa. El veterinario no necesita el calendario porque tiene la PWA `/app/` con la ruta del día y el briefing clínico. `GOOGLE_CALENDAR_ID_VETERINARIO` se queda **sin setear** a propósito: así usa `'primary'` del correo autorizado, que es el de MÜVA. El nombre de la variable y de `crearEventoVeterinario()` quedó heredado del diseño original — apuntan al calendario de MÜVA, no al del veterinario.
+2. ~~**`VETERINARIO_DIRECCION_BASE`**~~ → **`Calle 142 #19a-27, Bogotá`**, ya configurada en Railway el 2026-08-19. Etapa 3 desbloqueada.
+3. ~~**Acceso admin a Instagram de MÜVA**~~ → **DESCARTADO 2026-08-19.** El usuario decidió no implementar Instagram.
 4. **Confirmación del número de WhatsApp definitivo** — hoy se usa el chip de prueba `+57 305 4500349`; el usuario decidió NO confirmarlo como definitivo hasta terminar todas las pruebas.
 
 ## 8. Identidad visual (ya resuelta, no volver a preguntar)
@@ -155,7 +155,7 @@ Carpetas `etapa-N-*/` en la raíz del proyecto solo contienen los `schema.sql` d
 
 Todo dato de prueba creado durante desarrollo se identificó con `contacto_id` empezando en `DEMO-`, `TEST-QA-`, o números de teléfono ficticios (57300...), y se borró al terminar cada ronda. Al cierre de esta sesión, la base solo tiene 2 citas reales antiguas (`Kleo`, sin dueño/teléfono, de pruebas muy tempranas) y las citas reales creadas hoy en la prueba con WhatsApp real. Verificar antes de asumir que la base está "limpia".
 
-## 11b. Entregables para el cliente (2026-07-25)
+## 11b. Entregables para el cliente (2026-08-19)
 
 Tres documentos en la raíz del proyecto, todos con la identidad de MÜVA y sin recursos externos:
 
@@ -175,20 +175,24 @@ cd ../muva-pets-docs && vercel deploy --prod --yes
 
 `construir-sitio-docs.js` existe porque los tres HTML se escribieron como **fragmentos** para el visor de artefactos (empiezan en `<title>`, sin `<!doctype>`, `<head>` ni reset de CSS — eso lo ponía el visor). El script los envuelve en documentos completos, **descarta el `<style>` propio de cada uno** e inyecta el sistema visual compartido de `scripts/sitio/`. Lleva `noindex` y `robots.txt` con `Disallow: /`: el sitio es público por URL pero no aparece en buscadores.
 
-**Diseño (rehecho 2026-07-25):** estética cristal — paneles traslúcidos con `backdrop-filter` sobre lavados de color de la marca — con Fraunces + Jost cargadas de Google Fonts (en Vercel sí se puede; en el visor de artefactos no, por su CSP, y ahí caen al stack de respaldo). El diseño vive en **un solo lugar**: `scripts/sitio/estilo.css` y `scripts/sitio/interaccion.js`. No editar el CSS dentro de los HTML de origen: el constructor lo bota.
+**Diseño (rehecho 2026-08-19):** estética cristal — paneles traslúcidos con `backdrop-filter` sobre lavados de color de la marca — con Fraunces + Jost cargadas de Google Fonts (en Vercel sí se puede; en el visor de artefactos no, por su CSP, y ahí caen al stack de respaldo). El diseño vive en **un solo lugar**: `scripts/sitio/estilo.css` y `scripts/sitio/interaccion.js`. No editar el CSS dentro de los HTML de origen: el constructor lo bota.
 
 **Regla que no se debe romper en `interaccion.js`:** el contenido nunca depende del JavaScript para ser visible. El CSS solo esconde bajo `html.animar`, que agrega el script; hay respaldo de reveal por scroll y un interruptor a los 2,5 s que comprueba la **opacidad pintada** de una pieza ya revelada y, si sigue en 0, quita `animar`. Tampoco se usa `requestAnimationFrame` para nada: se congela en pestañas de fondo y en algunos webviews, y con él se congelaría el texto. Se acelera con temporizadores.
 
-**Dos huecos frente a la Cláusula Segunda detectados al redactarlos** (documentados con honestidad en la presentación, no maquillados):
+**Dos huecos frente a la Cláusula Segunda detectados al redactarlos:**
 
-1. **"Citas urgentes del mismo día con actualización de ruta en tiempo real"** — la urgencia se agenda y aparece de inmediato en la app y el panel, pero el reordenamiento de la ruta **no es automático**: el cron corre a las 8:00 p.m. para el día siguiente y el recálculo del día en curso solo se dispara llamando a mano `GET /rutas/calcular/:fecha` (requiere rol admin). Cerrarlo es pequeño: invocar `calcularRutaDelDia(hoy)` al crear una cita del mismo día.
-2. **"Notificación automática a MÜVA cuando el veterinario tenga disponibilidad libre"** — `notificarDisponibilidad()` sí se dispara en cada check-out y escribe en la tabla `notificaciones`, y el panel lo muestra, pero **no envía nada por WhatsApp**. La columna `enviada_whatsapp` existe y nadie la usa. Es notificación *pasiva* (hay que mirar el panel), no *push*.
+1. ~~**"Citas urgentes del mismo día con actualización de ruta en tiempo real"**~~ → **CERRADO 2026-08-19** (commit `c741403`). `reordenarRutaSiHaceFalta()` en `services/atencion.js` recalcula la ruta al confirmar una cita si es para hoy, o para mañana pasadas las 8:00 p.m. (cuando el cron de esa noche ya corrió). La decisión está en `debeReordenar()`, función pura y exportada; pruebas en `scripts/probar-reordenamiento.js` (7/7).
+2. **"Notificación automática a MÜVA cuando el veterinario tenga disponibilidad libre"** — `notificarDisponibilidad()` sí se dispara en cada check-out y escribe en la tabla `notificaciones`, y el panel lo muestra, pero **no envía nada por WhatsApp**. La columna `enviada_whatsapp` existe y nadie la usa. Es notificación *pasiva* (hay que mirar el panel), no *push*. Se documentó ante RCS como "MÜVA lo ve en el panel", que es exacto.
+
+**Instagram: descartado por el usuario el 2026-08-19.** No se va a implementar ni conectar; se quitó de la presentación y de la lista de pendientes del cliente. El código (`src/webhooks/instagram.js`, `messenger.enviarInstagram`) sigue en el repo y funcionando, solo que sin webhook configurado en Meta. **Ojo: es un módulo de la Cláusula Segunda** ("Recepción de agendamientos vía WhatsApp e Instagram"), así que conviene dejarlo por escrito en el acta de entrega como alcance retirado de común acuerdo.
+
+**Pendiente de verificación real:** el motor de rutas nunca se ha visto correr con una jornada real. Se puede forzar con `GET /rutas/calcular/:fecha` (rol admin) y mirar los logs de Railway.
 
 ## 12. Próximo paso
 
 Terminar de desplegar la Etapa 8 (sección 13): correr la migración SQL, setear las variables nuevas en Railway y probar por WhatsApp con el número de prueba.
 
-## 13. Etapa 8 — Agente conversacional y triaje (2026-07-25)
+## 13. Etapa 8 — Agente conversacional y triaje (2026-08-19)
 
 ### Qué cambió y por qué
 

@@ -156,6 +156,17 @@ for (const doc of DOCS) {
 fs.writeFileSync(path.join(salida, 'index.html'), pagina(PORTADA, { portada: true }), 'utf8');
 console.log('  index.html    ←  portada');
 
+// El Word editable que descarga el veterinario desde la página de triaje.
+const word = path.join(raiz, 'TRIAJE-PARA-REVISION-DEL-VETERINARIO.docx');
+if (fs.existsSync(word)) {
+  fs.copyFileSync(word, path.join(salida, 'triaje.docx'));
+  console.log('  triaje.docx   ←  TRIAJE-PARA-REVISION-DEL-VETERINARIO.docx');
+} else {
+  console.error('\n⚠  FALTA el Word editable. Corre antes: node scripts/generar-triaje-word.js');
+  console.error('   El botón de descarga de la página de triaje quedaría roto.\n');
+  process.exit(1);
+}
+
 // Documentos de cliente: no tienen por qué aparecer en buscadores.
 fs.writeFileSync(path.join(salida, 'robots.txt'), 'User-agent: *\nDisallow: /\n', 'utf8');
 

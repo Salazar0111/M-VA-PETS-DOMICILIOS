@@ -263,14 +263,23 @@
       <table>
         <thead><tr><th>Situación</th><th>Qué hacer</th></tr></thead>
         <tbody>
-          <tr><td>Un cliente pide algo que el asistente no cubre (un servicio nuevo, una cotización especial)</td><td>Escribirle directamente desde el WhatsApp de MÜVA. Una persona puede intervenir en cualquier conversación en cualquier momento.</td></tr>
-          <tr><td>El asistente entendió mal un dato</td><td>El cliente puede corregirlo en el mismo chat. Si la cita ya quedó agendada con un error, se corrige desde MÜVA avisándonos.</td></tr>
+          <tr><td>Un cliente pide algo que el asistente no cubre (un servicio nuevo, una cotización especial)</td><td>El panel muestra el teléfono del cliente en la tabla de citas: llámelo o escríbale desde otra línea. Ver abajo la nota sobre intervención humana.</td></tr>
+          <tr><td>El asistente entendió mal un dato</td><td>El cliente puede corregirlo en el mismo chat: el asistente rehace la cita con el dato bueno. Si la cita ya quedó agendada con un error, se corrige desde MÜVA avisándonos.</td></tr>
           <tr><td>Llega una foto, un audio o un sticker</td><td>El asistente responde que no puede verlo y pide que se lo escriban. Las imágenes y audios no se procesan.</td></tr>
           <tr><td>Se quiere cambiar el tono, una respuesta o un criterio</td><td>Es un ajuste de configuración, no un desarrollo nuevo. Basta con indicar qué debería decir en su lugar.</td></tr>
-          <tr><td>Un caso de urgencia real entra por el chat</td><td>El asistente ya lo derivó a clínica 24 horas. La conversación queda registrada y visible para MÜVA.</td></tr>
+          <tr><td>Un caso de urgencia real entra por el chat</td><td>El asistente ya lo derivó a clínica 24 horas, y la cita queda en el panel con la marca de urgencia y los síntomas reportados.</td></tr>
         </tbody>
       </table>
     </div>
+
+    <h3>Intervención humana en el chat</h3>
+    <p>Conviene tener claro cómo funciona hoy, para no contar con algo que no está:</p>
+    <ul class="limpia">
+      <li>El número que atiende está conectado por la API de WhatsApp de Meta, no por la aplicación normal de WhatsApp. Eso es lo que permite que responda solo, a cualquier hora y a varias personas a la vez — pero significa que <b>ese número no se abre desde un celular para contestar a mano</b>.</li>
+      <li>Por eso, <b>hoy todas las respuestas de ese chat las da el asistente</b>. No hay forma de tomar el control de una conversación en curso ni de escribir dentro de ella.</li>
+      <li>Cuando haga falta hablar con alguien directamente, el panel muestra su <b>teléfono</b> en la tabla de citas y en el historial: se le llama o se le escribe desde otra línea. En la práctica esto cubre casi todos los casos, porque son cotizaciones o dudas puntuales.</li>
+    </ul>
+    <p class="nota"><b>¿Se puede habilitar?</b> Sí. Requiere una bandeja de conversaciones dentro del panel — ver los mensajes, pausar al asistente para un contacto y responder desde ahí. No está incluido en el alcance actual; se cotiza como módulo adicional.</p>
   </section>
 
   <!-- ================= 5 ================= -->

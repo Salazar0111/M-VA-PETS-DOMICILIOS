@@ -1,6 +1,6 @@
 # MÜVA PETS — Reglas de triaje del chat
 
-_Documento para revisión clínica · generado el 25 de julio de 2026_
+_Documento para revisión clínica · generado el 19 de agosto de 2026_
 
 Cuando una persona escribe por WhatsApp o Instagram contando qué le pasa a su mascota, el sistema lee ese texto y hace dos cosas: decide qué tan rápido hay que atender y arma la lista de qué debe alistar el veterinario antes de salir. También le dice al dueño qué puede preparar mientras tanto.
 

@@ -376,6 +376,31 @@ code{
 
 /* ─────────────────────────── triaje ─────────────────────────── */
 
+/* Descarga del Word editable. Es la acción principal del documento para
+   el veterinario, así que se ve como botón, no como enlace de texto. */
+.descarga{
+  display:flex;align-items:center;gap:1rem;text-decoration:none;color:inherit;
+  padding:1.1rem 1.3rem;border-radius:var(--curva);
+  background:var(--vidrio);border:1px solid var(--vidrio-borde);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra);
+  transition:transform .35s cubic-bezier(.2,.8,.25,1),border-color .3s,box-shadow .35s;
+}
+.descarga:hover{transform:translateY(-3px);border-color:rgba(190,124,96,.45);
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra-alta)}
+.descarga:focus-visible{outline:2px solid var(--terra);outline-offset:3px}
+.descarga-ic{
+  flex:none;width:2.6rem;height:2.6rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--ojo-fondo);border:1px solid rgba(190,124,96,.32);
+  color:var(--terra);font-size:1.15rem;font-weight:700;
+  transition:transform .3s cubic-bezier(.2,.8,.25,1);
+}
+.descarga:hover .descarga-ic{transform:translateY(2px)}
+.descarga-t{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.descarga-t b{font-size:1.02rem;color:var(--bosque)}
+.descarga-t small{font-size:.9rem;color:var(--tinta-2);line-height:1.5}
+
 .caso.critico{border-left:3px solid var(--alarma);background:var(--alarma-fondo)}
 .caso-cab{display:flex;align-items:center;justify-content:space-between;gap:.85rem;flex-wrap:wrap}
 .nivel-nota{font-size:.9rem;color:var(--tenue);margin-top:-.35rem}
@@ -474,13 +499,20 @@ html.animar .rv.on{opacity:1;transform:none}
     <div class="marca">müva</div>
     <p class="eyebrow" style="margin-top:.9rem">Revisión clínica</p>
     <h1>Reglas de triaje del chat de agendamiento</h1>
-    <p class="fecha">Generado el 25 de julio de 2026 · MARKETEADOS para MÜVA PETS</p>
+    <p class="fecha">Generado el 19 de agosto de 2026 · MARKETEADOS para MÜVA PETS</p>
   </header>
 
   <section>
     <p class="intro">Cuando una persona escribe por WhatsApp o Instagram contando qué le pasa a su mascota, el sistema lee ese texto y hace dos cosas: decide qué tan rápido hay que atender y arma la lista de qué debe alistar el veterinario antes de salir. También le dice al dueño qué puede preparar mientras tanto.</p>
     <p class="descargo">Esto no es un diagnóstico y no reemplaza la valoración. Es preparación logística.</p>
     <p class="pedido">Lo que necesitamos de ti: que marques lo que esté mal. Sobra algo, falta algo, un nivel de urgencia que no corresponde, una muestra que no se toma a domicilio, una recomendación al dueño que sea incorrecta. Cualquier corrección se aplica directo al sistema.</p>
+    <a class="descarga" href="/triaje.docx" download>
+      <span class="descarga-ic" aria-hidden="true">↓</span>
+      <span class="descarga-t">
+        <b>Descargar en Word para editarlo</b>
+        <small>Trae una línea de observaciones bajo cada caso. Tache, agregue o corrija directamente en el archivo.</small>
+      </span>
+    </a>
     <p class="nota"><b>Cómo leer las frases de ejemplo.</b> El sistema no busca la frase exacta, busca el fragmento. Un fragmento cortado como “ahogand” cubre “ahogando”, “ahogándose”, “se está ahogando”; “colaps” cubre “colapsó” y “colapsado”. Las barras son alternativas: “lengua morada/azul” significa que sirve cualquiera de las dos. No distingue mayúsculas ni tildes.</p>
   </section>
 

@@ -376,6 +376,31 @@ code{
 
 /* ─────────────────────────── triaje ─────────────────────────── */
 
+/* Descarga del Word editable. Es la acción principal del documento para
+   el veterinario, así que se ve como botón, no como enlace de texto. */
+.descarga{
+  display:flex;align-items:center;gap:1rem;text-decoration:none;color:inherit;
+  padding:1.1rem 1.3rem;border-radius:var(--curva);
+  background:var(--vidrio);border:1px solid var(--vidrio-borde);
+  -webkit-backdrop-filter:var(--desenfoque);backdrop-filter:var(--desenfoque);
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra);
+  transition:transform .35s cubic-bezier(.2,.8,.25,1),border-color .3s,box-shadow .35s;
+}
+.descarga:hover{transform:translateY(-3px);border-color:rgba(190,124,96,.45);
+  box-shadow:var(--vidrio-luz),var(--vidrio-sombra-alta)}
+.descarga:focus-visible{outline:2px solid var(--terra);outline-offset:3px}
+.descarga-ic{
+  flex:none;width:2.6rem;height:2.6rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--ojo-fondo);border:1px solid rgba(190,124,96,.32);
+  color:var(--terra);font-size:1.15rem;font-weight:700;
+  transition:transform .3s cubic-bezier(.2,.8,.25,1);
+}
+.descarga:hover .descarga-ic{transform:translateY(2px)}
+.descarga-t{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.descarga-t b{font-size:1.02rem;color:var(--bosque)}
+.descarga-t small{font-size:.9rem;color:var(--tinta-2);line-height:1.5}
+
 .caso.critico{border-left:3px solid var(--alarma);background:var(--alarma-fondo)}
 .caso-cab{display:flex;align-items:center;justify-content:space-between;gap:.85rem;flex-wrap:wrap}
 .nivel-nota{font-size:.9rem;color:var(--tenue);margin-top:-.35rem}

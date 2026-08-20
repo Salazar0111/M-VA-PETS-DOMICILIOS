@@ -13,7 +13,7 @@ const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 // El nombre quedó heredado del diseño original. Hoy este evento va al
 // calendario de MÜVA (`resultadosmuva@gmail.com`), no al del veterinario:
 // él ve su jornada en la PWA /app/, con el briefing clínico completo.
-// Decisión del 2026-07-25 — por eso GOOGLE_CALENDAR_ID_VETERINARIO se deja
+// Decisión del 2026-08-19 — por eso GOOGLE_CALENDAR_ID_VETERINARIO se deja
 // sin setear y cae en 'primary'.
 async function crearEventoVeterinario(datosCita) {
   const { inicio, fin, interpretado } = interpretarFechaHora(datosCita.fechaHora, datosCita.tipoConsulta);

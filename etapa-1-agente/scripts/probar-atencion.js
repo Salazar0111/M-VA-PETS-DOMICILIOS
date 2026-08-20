@@ -16,6 +16,7 @@ const ruta = (p) => require.resolve(path.join(__dirname, '..', p));
 const llamadas = { modelo: [], citas: [], eventos: [], rutas: [] };
 let guion = null;      // qué debe pedir el "modelo" en el próximo turno
 let fallaGuardado = false;
+let fallaCalendar = false;
 
 function stub(p, exports) {
   const id = ruta(p);
@@ -54,6 +55,7 @@ stub('src/services/supabase.js', {
 
 stub('src/services/calendar.js', {
   crearEventoVeterinario: async (d) => {
+    if (fallaCalendar) throw new Error('invalid_grant: token has been expired or revoked');
     llamadas.eventos.push(d);
     const { inicio, interpretado } = interpretarFechaHora(d.fechaHora, d.tipoConsulta);
     return { eventoId: 'evt-1', fechaHoraConfirmada: inicio, interpretado };
@@ -131,7 +133,18 @@ async function conversar(id, texto) {
   revisar(cita && cita.muestrasSugeridas.some((m) => /Coprológico/.test(m)), 'muestras a alistar guardadas');
   revisar(/popó fresca/.test(r), 'al cliente se le dice qué preparar');
 
-  // ── 6. Si el guardado falla, NO se le puede decir que quedó guardado ──
+  // ── 6. Si Google Calendar falla, la cita SE GUARDA IGUAL ──
+  //    Esto es lo que tumbó la primera prueba en vivo: el refresh token de
+  //    Google estaba vencido y se perdía la cita entera.
+  fallaCalendar = true;
+  llamadas.citas.length = 0;
+  guion = CITA('mañana a las 2pm');
+  r = await conversar('5737', 'confirmado');
+  fallaCalendar = false;
+  revisar(llamadas.citas.length === 1, 'con Calendar caído, la cita SÍ se guarda en Supabase');
+  revisar(/"ok":true/.test(r), 'y al cliente se le confirma normalmente');
+
+  // ── 7. Si el guardado falla, NO se le puede decir que quedó guardado ──
   fallaGuardado = true;
   llamadas.citas.length = 0;
   guion = CITA('mañana a las 11am');

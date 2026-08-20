@@ -155,7 +155,7 @@ async function agendarCita(canal, contactoId, entrada) {
 
   // Se valida ANTES de tocar Google Calendar y Supabase: si el horario no
   // sirve, no puede quedar un evento fantasma en la agenda del veterinario.
-  const { inicio } = interpretarFechaHora(datos.fechaHora, datos.tipoConsulta);
+  const { inicio, interpretado } = interpretarFechaHora(datos.fechaHora, datos.tipoConsulta);
 
   // Las 4:00 p.m. SÍ son agendables: son el último espacio del día, no el
   // primero que sobra. Comparar solo la hora entera (`hora >= 16`) rechazaba
@@ -177,37 +177,56 @@ async function agendarCita(canal, contactoId, entrada) {
     };
   }
 
-  // A partir de aquí sí se toca el mundo exterior. Si algo falla, hay que
-  // saber EN QUÉ PASO fue: antes el error llegaba pelado y era imposible
-  // distinguir un problema de Google Calendar de uno de la base de datos.
-  let paso = 'Google Calendar';
+  // ORDEN IMPORTANTE: primero Supabase, después Google Calendar.
+  //
+  // Antes era al revés, y por eso un refresh token vencido de Google tumbó
+  // una cita entera en la primera prueba con un cliente: Calendar reventaba
+  // y la cita no llegaba a guardarse nunca. El sistema de registro es
+  // Supabase — de ahí leen la app del veterinario, el panel y las rutas.
+  // Calendar es una COPIA para que MÜVA la vea en su agenda. Que falle la
+  // copia no puede costar el original.
   let cita;
-  let eventoId, fechaHoraConfirmada, interpretado;
   try {
-    ({ eventoId, fechaHoraConfirmada, interpretado } = await crearEventoVeterinario(datos));
-    paso = 'guardar la cita en Supabase';
     cita = await crearCita(datos);
-    paso = 'enlazar el evento con la cita';
-    await actualizarEventoVeterinario(cita.id, eventoId, fechaHoraConfirmada);
   } catch (err) {
-    // La cita se pierde si nadie la ve: queda en los logs como JSON para
-    // poder recuperarla a mano y llamar al cliente.
-    console.error(`[Atención] FALLÓ al ${paso}: ${err.message}`);
+    // Esto sí es fatal: sin registro no hay cita. Queda el volcado en los
+    // logs para poder recuperarla a mano y llamar al cliente.
+    console.error(`[Atención] FALLÓ al guardar la cita en Supabase: ${err.message}`);
     console.error('[Atención] Cita NO guardada. Datos para recuperarla:', JSON.stringify(datos));
     if (err.stack) console.error(err.stack);
-    err.pasoQueFallo = paso;
+    err.pasoQueFallo = 'guardar la cita en Supabase';
     throw err;
   }
 
+  let eventoId = null;
+  try {
+    ({ eventoId } = await crearEventoVeterinario(datos));
+  } catch (err) {
+    // La cita YA está guardada y va a salir en la ruta del veterinario.
+    // Solo falta el reflejo en la agenda de MÜVA.
+    console.error(
+      `[Atención] ⚠ Cita ${cita.id} guardada SIN evento en Google Calendar: ${err.message}`
+    );
+    console.error(
+      '[Atención] ⚠ Revisar GOOGLE_REFRESH_TOKEN. La cita está en Supabase y el veterinario la verá; ' +
+        'lo que falta es el evento en el calendario de MÜVA.'
+    );
+  }
+
+  // Se confirma con la fecha que calculamos nosotros, no con la que
+  // devolvía Calendar: así la cita queda confirmada aunque Google falle.
+  await actualizarEventoVeterinario(cita.id, eventoId, inicio);
+
   console.log(
-    `[Atención] Cita ${cita.id} agendada (${canal}) — urgencia ${evaluacion.nivel} — ${horaLegible(fechaHoraConfirmada)}`
+    `[Atención] Cita ${cita.id} agendada (${canal}) — urgencia ${evaluacion.nivel} — ` +
+      `${horaLegible(inicio)}${eventoId ? '' : ' — SIN evento en Calendar'}`
   );
 
-  reordenarRutaSiHaceFalta(fechaHoraConfirmada);
+  reordenarRutaSiHaceFalta(inicio);
 
   return {
     ok: true,
-    quedo_agendada_para: horaLegible(fechaHoraConfirmada),
+    quedo_agendada_para: horaLegible(inicio),
     // Cuando el parser no logró leer día y hora con certeza, el modelo debe
     // confirmarlo en voz alta en vez de darlo por hecho.
     confirmar_con_el_cliente: !interpretado,

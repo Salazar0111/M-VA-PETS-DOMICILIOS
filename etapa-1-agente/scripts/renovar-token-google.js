@@ -21,9 +21,18 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const PUERTO = 5599;
-const REDIRECT = `http://localhost:${PUERTO}/callback`;
+// Si en Google Cloud Console ya hay una URI de localhost registrada, se
+// puede reusar sin tocar nada allá:
+//     GOOGLE_REDIRECT_URI=http://localhost:3000/oauth2callback node scripts/renovar-token-google.js
+const REDIRECT = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5599/callback';
+const PUERTO = Number(new URL(REDIRECT).port) || 80;
+const RUTA_CALLBACK = new URL(REDIRECT).pathname;
 const SCOPE = 'https://www.googleapis.com/auth/calendar';
+
+if (!/^http:\/\/localhost:/.test(REDIRECT)) {
+  console.error(`La URI debe ser de localhost para que este script pueda recibirla. Recibí: ${REDIRECT}`);
+  process.exit(1);
+}
 
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
@@ -95,7 +104,7 @@ function guardarEnEnv(token) {
 }
 
 const servidor = http.createServer(async (req, res) => {
-  if (!req.url.startsWith('/callback')) {
+  if (!req.url.startsWith(RUTA_CALLBACK)) {
     res.writeHead(404).end();
     return;
   }
@@ -130,7 +139,16 @@ const servidor = http.createServer(async (req, res) => {
 });
 
 servidor.listen(PUERTO, () => {
-  console.log('\nAbre este enlace en el navegador, con la cuenta resultadosmuva@gmail.com:\n');
+  console.log('\n────────────────────────────────────────────────────────');
+  console.log('URI de redirección que se va a usar:');
+  console.log(`    ${REDIRECT}`);
+  console.log('Tiene que estar EXACTA en Google Cloud Console → Credenciales →');
+  console.log('tu ID de cliente OAuth → URIs de redireccionamiento autorizados.');
+  console.log('(Si ya tienes otra registrada, corre esto con GOOGLE_REDIRECT_URI=<la tuya>)');
+  console.log('────────────────────────────────────────────────────────');
+  console.log('\n⚠ INICIA SESIÓN CON resultadosmuva@gmail.com, NO con tu cuenta personal.');
+  console.log('  El calendario donde deben caer las citas es el de MÜVA.\n');
+  console.log('Abre este enlace:\n');
   console.log(url);
   console.log('\nEsperando la autorización…');
 });
